@@ -221,6 +221,21 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
   border-top-color:var(--blue);animation:pvSpin .8s linear infinite;position:relative;z-index:1}
 @keyframes pvSpin{to{transform:rotate(360deg)}}
 
+/* ---------- Folder per jenis file ---------- */
+.folder-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.fbtn{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;
+  border:1px solid rgba(148,163,199,.24);background:rgba(15,20,38,.6);color:#c6d0ea;
+  font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease}
+.fbtn .fi{font-size:13.5px;line-height:1}
+.fbtn .fdot{width:7px;height:7px;border-radius:50%;flex:none;box-shadow:0 0 6px currentColor}
+.fbtn .fc2{background:rgba(148,163,199,.16);border-radius:999px;padding:1px 7px;font-size:11px;color:#9fb0d6}
+.fbtn:hover{border-color:rgba(66,133,244,.6);color:#fff;transform:translateY(-1px)}
+.fbtn.on{color:#fff;border-color:rgba(66,133,244,.65);
+  background:linear-gradient(135deg,rgba(66,133,244,.30),rgba(123,92,240,.26),rgba(255,27,45,.22));
+  box-shadow:0 0 0 1px rgba(66,133,244,.35),0 8px 18px -8px rgba(66,133,244,.55)}
+.fbtn.on .fc2{background:rgba(255,255,255,.2);color:#fff}
+
 /* ---------- Editor Kode (gaya Acode) ---------- */
 .engine-chip.ed{color:#5fe3a5;background:rgba(61,214,140,.13);border:1px solid rgba(61,214,140,.4)}
 .ed-toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
@@ -300,6 +315,8 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
   .tools input[type=search]{flex:1;width:auto;max-width:none}
   .tools{width:100%}
   .dropzone{padding:30px 14px}
+  .folder-bar{gap:6px;margin-bottom:12px}
+  .fbtn{padding:6px 10px;font-size:11.5px}
 }
 </style>
 </head>
@@ -373,6 +390,7 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
           <button id="deleteAllFiles" class="btn danger small" data-i18n="btnDelAll">Hapus Semua</button>
         </div>
       </div>
+      <div id="folderBar" class="folder-bar" role="tablist" aria-label="Folder jenis file"></div>
       <div id="fileGrid" class="grid"></div>
       <div id="fileEmpty" class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
@@ -477,7 +495,7 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
         <span class="badge"><span class="dot" style="background:#ff1b2d"></span>Opera <span class="ok">✓</span></span>
       </div>
       <p class="muted small" data-i18n="footerText">Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ &amp; Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ &amp; Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser &amp; profil yang dipakai, dan tidak pernah dikirim ke server mana pun.</p>
-      <p class="muted small" style="margin-top:9px;opacity:.75">v1.2 · pratinjau futuristik + editor kode gaya Acode / futuristic preview + Acode-style code editor</p>
+      <p class="muted small" style="margin-top:9px;opacity:.75">v1.3 · folder per jenis file + editor kode gaya Acode + pratinjau futuristik / per-type folders + Acode-style code editor + futuristic preview</p>
     </div>
   </footer>
 </div>
@@ -529,6 +547,7 @@ id:{
   dzMain:'Tarik & letakkan file di sini', dzOr:'atau', btnBrowse:'Pilih File',
   dzTypes:'Format utama: PDF · DOCX · XLSX · CSV · JSON · HTML · CSS · JS · PY · ZIP — banyak lagi; gambar juga didukung',
   filesTitle:'Dokumen Tersimpan', searchPhFiles:'Cari dokumen…', btnDelAll:'Hapus Semua',
+  folderAll:'Semua', emptyFolder:'Folder ini masih kosong — unggah file untuk mengisinya.',
   emptyFiles:'Belum ada dokumen — unggah file pertama Anda lewat area unggah di atas.',
   emptyFilesSearch:'Tidak ada dokumen yang cocok dengan pencarian.',
   notesTitle:'Catatan Teks', notesHint:'Catatan disimpan di localStorage (kapasitas ±5 MB) — ideal untuk teks singkat.',
@@ -581,6 +600,7 @@ en:{
   dzMain:'Drag & drop your files here', dzOr:'or', btnBrowse:'Browse Files',
   dzTypes:'Main formats: PDF · DOCX · XLSX · CSV · JSON · HTML · CSS · JS · PY · ZIP — and many more; images are supported too',
   filesTitle:'Stored Documents', searchPhFiles:'Search documents…', btnDelAll:'Delete All',
+  folderAll:'All', emptyFolder:'This folder is still empty — upload files to fill it.',
   emptyFiles:'No documents yet — upload your first file using the drop zone above.',
   emptyFilesSearch:'No documents match your search.',
   notesTitle:'Text Notes', notesHint:'Notes are kept in localStorage (~5 MB capacity) — ideal for short text.',
@@ -875,18 +895,69 @@ function renderPreviewBody(rec){
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closePreview();});
 $('#pvBackdrop').addEventListener('click',function(e){if(e.target===this)closePreview();});
 
+/* ================= FOLDER PER JENIS FILE ================= */
+var CATS=[
+  {id:'html',   icon:'🌐', color:'#e34f26', label:{id:'HTML',en:'HTML'},                ext:{html:1,htm:1}},
+  {id:'css',    icon:'🎨', color:'#1572b6', label:{id:'CSS',en:'CSS'},                  ext:{css:1,scss:1,sass:1,less:1}},
+  {id:'js',     icon:'⚡', color:'#f7df1e', label:{id:'JavaScript',en:'JavaScript'},    ext:{js:1,mjs:1,ts:1,jsx:1,tsx:1}},
+  {id:'python', icon:'🐍', color:'#3776ab', label:{id:'Python',en:'Python'},            ext:{py:1,ipynb:1}},
+  {id:'code',   icon:'💻', color:'#89e051', label:{id:'Kode Lain',en:'Other Code'},     ext:{java:1,c:1,cpp:1,cs:1,go:1,rs:1,rb:1,php:1,swift:1,kt:1,dart:1,lua:1,sh:1,bat:1,ps1:1,sql:1,json:1,xml:1,yml:1,yaml:1,toml:1,ini:1,conf:1,md:1,log:1}},
+  {id:'image',  icon:'🖼️', color:'#4285f4', label:{id:'Gambar',en:'Images'},            ext:{png:1,jpg:1,jpeg:1,gif:1,webp:1,bmp:1,svg:1,ico:1,avif:1}},
+  {id:'video',  icon:'🎬', color:'#ff1b2d', label:{id:'Video',en:'Video'},              ext:{mp4:1,webm:1,mkv:1,mov:1,avi:1}},
+  {id:'audio',  icon:'🎵', color:'#9c27b0', label:{id:'Audio',en:'Audio'},              ext:{mp3:1,wav:1,ogg:1,m4a:1,flac:1}},
+  {id:'doc',    icon:'📄', color:'#d93025', label:{id:'Dokumen',en:'Documents'},        ext:{pdf:1,doc:1,docx:1,odt:1,rtf:1,txt:1}},
+  {id:'sheet',  icon:'📊', color:'#0f9d58', label:{id:'Spreadsheet',en:'Spreadsheets'}, ext:{xls:1,xlsx:1,ods:1,csv:1,tsv:1}},
+  {id:'slide',  icon:'🎞️', color:'#f4b400', label:{id:'Presentasi',en:'Presentations'}, ext:{ppt:1,pptx:1,odp:1,key:1}},
+  {id:'archive',icon:'📦', color:'#a0522d', label:{id:'Arsip',en:'Archives'},           ext:{zip:1,rar:1,'7z':1,tar:1,gz:1}},
+  {id:'other',  icon:'📁', color:'#8a94b3', label:{id:'Lainnya',en:'Other'},            ext:null}
+];
+var FOLDER_KEY='storageku_folder';
+var curFolder='all';
+try{curFolder=localStorage.getItem(FOLDER_KEY)||'all';}catch(e){}
+function catOf(name){var e=extOf(name),i;for(i=0;i<CATS.length;i++){var c=CATS[i];if(c.ext&&c.ext[e])return c.id;}return 'other';}
+function renderFolderBar(){
+  var bar=$('#folderBar');if(!bar)return;
+  var t=I18N[lang],counts={},i;
+  for(i=0;i<CATS.length;i++)counts[CATS[i].id]=0;
+  for(i=0;i<files.length;i++)counts[catOf(files[i].name)]++;
+  bar.innerHTML='';
+  function chip(cid,icon,label,count,color){
+    var b=document.createElement('button');b.type='button';b.className='fbtn'+(curFolder===cid?' on':'');
+    b.setAttribute('role','tab');b.setAttribute('aria-selected',curFolder===cid?'true':'false');
+    if(color){var d=document.createElement('span');d.className='fdot';d.style.background=color;b.appendChild(d);}
+    var ic=document.createElement('span');ic.className='fi';ic.textContent=icon;b.appendChild(ic);
+    var lb=document.createElement('span');lb.textContent=label;b.appendChild(lb);
+    var ct=document.createElement('span');ct.className='fc2';ct.textContent=count;b.appendChild(ct);
+    b.addEventListener('click',function(){
+      curFolder=cid;
+      try{localStorage.setItem(FOLDER_KEY,cid);}catch(e){}
+      renderFiles();
+    });
+    bar.appendChild(b);
+  }
+  chip('all','📂',t.folderAll,files.length,null);
+  for(var j=0;j<CATS.length;j++){
+    var c=CATS[j];
+    if(c.id==='other'&&counts.other===0)continue;
+    chip(c.id,c.icon,c.label[lang],counts[c.id],c.color);
+  }
+}
+
 /* ================= RENDER DOKUMEN ================= */
 function renderFiles(){
   var grid=$('#fileGrid'),t=I18N[lang];
+  renderFolderBar();
   grid.innerHTML='';
   var q=($('#fileSearch').value||'').trim().toLowerCase();
-  var list=files.filter(function(f){return !q||f.name.toLowerCase().indexOf(q)!==-1;})
+  var list=files.filter(function(f){return curFolder==='all'||catOf(f.name)===curFolder;})
+                .filter(function(f){return !q||f.name.toLowerCase().indexOf(q)!==-1;})
                 .sort(function(a,b){return b.date.localeCompare(a.date);});
-  $('#fileCount').textContent=files.length;
+  var fActive=curFolder!=='all'||!!q;
+  $('#fileCount').textContent=fActive?list.length+'/'+files.length:files.length;
   var empty=$('#fileEmpty'),emptyTxt=$('#fileEmptyText');
   if(!list.length){
     empty.hidden=false;
-    emptyTxt.textContent=dbFailed?t.toastDbError:(q?t.emptyFilesSearch:t.emptyFiles);
+    emptyTxt.textContent=dbFailed?t.toastDbError:(q?t.emptyFilesSearch:(curFolder!=='all'?t.emptyFolder:t.emptyFiles));
   }else{empty.hidden=true;}
   list.forEach(function(rec){
     var card=document.createElement('article');card.className='fcard';
