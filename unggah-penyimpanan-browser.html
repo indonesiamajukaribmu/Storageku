@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0d13">
+<title>StorageKu — Penyimpanan Data di Browser</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%234285f4"/><stop offset="1" stop-color="%23ff1b2d"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(%23g)"/><ellipse cx="32" cy="19" rx="15" ry="6.5" fill="white"/><path d="M17 19v12c0 3.6 6.7 6.5 15 6.5s15-2.9 15-6.5V19" fill="none" stroke="white" stroke-width="4"/><path d="M17 31v12c0 3.6 6.7 6.5 15 6.5s15-2.9 15-6.5V31" fill="none" stroke="white" stroke-width="4"/></svg>'>
+<style>
+/* ============================================================
+   StorageKu — Unggah & simpan data langsung di browser
+   Penyimpanan : IndexedDB (file) + localStorage (catatan teks)
+   Kompatibel  : Google Chrome & Opera (basis Chromium)
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0b0d13; --card:#151927; --card2:#1a1f30; --inset:#0e1119;
+  --line:#232a3e; --line2:#2e3752;
+  --text:#e8ecf6; --muted:#8b93ab;
+  --blue:#4285f4; --red:#ff1b2d; --green:#3dd68c; --amber:#fbd75b;
+  --grad:linear-gradient(135deg,#4285f4 0%,#7b5cf0 55%,#ff1b2d 115%);
+}
+html{color-scheme:dark}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;
+  background:var(--bg); color:var(--text); min-height:100vh;
+  line-height:1.55; overflow-x:hidden;
+}
+body::before,body::after{content:'';position:fixed;z-index:-1;border-radius:50%;filter:blur(95px);pointer-events:none}
+body::before{width:540px;height:540px;left:-170px;top:-190px;background:rgba(66,133,244,.16)}
+body::after{width:500px;height:500px;right:-150px;top:-150px;background:rgba(255,27,45,.13)}
+::selection{background:rgba(66,133,244,.45)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:6px}
+.container{max-width:1080px;margin:0 auto;padding:0 20px}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+
+/* ---------- Header ---------- */
+header{padding:30px 0 4px}
+.brand{display:flex;align-items:flex-start;gap:15px;flex-wrap:wrap}
+.logo{width:56px;height:56px;border-radius:15px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;flex:none;
+  box-shadow:0 8px 26px rgba(66,133,244,.35)}
+.logo svg{width:30px;height:30px}
+h1{font-size:27px;font-weight:800;letter-spacing:.2px;line-height:1.2;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--muted);font-size:13.5px;max-width:600px;margin-top:3px}
+.header-side{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-top:4px}
+.badge{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);
+  background:#141826;border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600}
+.badge .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.badge .ok{color:var(--green);font-weight:800}
+
+/* ---------- Tombol & input ---------- */
+.btn{border:0;cursor:pointer;font:inherit;font-weight:600;border-radius:10px;
+  padding:10px 17px;display:inline-flex;align-items:center;gap:8px;transition:.18s;color:var(--text)}
+.btn.primary{background:var(--grad);color:#fff;box-shadow:0 6px 18px rgba(66,133,244,.32)}
+.btn.primary:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn.ghost{background:transparent;border:1px solid var(--line2)}
+.btn.ghost:hover{border-color:#43507a;background:rgba(66,133,244,.08)}
+.btn.danger{background:rgba(255,27,45,.11);border:1px solid rgba(255,27,45,.42);color:#ff7b85}
+.btn.danger:hover{background:rgba(255,27,45,.2)}
+.btn.small{padding:7px 12px;font-size:13px;border-radius:9px}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+input[type=search],textarea{
+  font:inherit;color:var(--text);background:var(--inset);
+  border:1px solid var(--line2);border-radius:10px;padding:10px 13px;width:100%}
+input[type=search]:focus,textarea:focus{outline:none;border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(66,133,244,.18)}
+input[type=search]{max-width:240px}
+.tools input[type=search]{width:230px;max-width:230px;flex:none}
+
+/* ---------- Kartu statistik ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:24px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px 18px;
+  display:flex;align-items:center;gap:13px}
+.stat .ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.stat .ico svg{width:21px;height:21px}
+.ico.blue{background:rgba(66,133,244,.14);color:#8ab4f8}
+.ico.red{background:rgba(255,27,45,.13);color:#ff8a93}
+.ico.green{background:rgba(61,214,140,.13);color:#5fe3a5}
+.stat .num{font-size:22px;font-weight:800;line-height:1.15}
+.stat .lbl{font-size:12px;color:var(--muted)}
+
+/* ---------- Kartu section ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:22px;margin-top:20px;animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.section-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.section-head h2{font-size:17.5px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.count{background:rgba(66,133,244,.16);border:1px solid rgba(66,133,244,.4);color:#8ab4f8;
+  font-size:12px;font-weight:700;border-radius:999px;padding:1px 9px}
+.tools{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hint{font-size:12.5px;color:var(--muted);margin:-6px 0 14px}
+.engine-chip{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:10.5px;font-weight:700;
+  letter-spacing:.4px;padding:3.5px 9px;border-radius:7px;white-space:nowrap}
+.engine-chip.idb{color:#8ab4f8;background:rgba(66,133,244,.14);border:1px solid rgba(66,133,244,.38)}
+.engine-chip.ls{color:#ff8a93;background:rgba(255,27,45,.12);border:1px solid rgba(255,27,45,.38)}
+.mini-chip{font-family:ui-monospace,Consolas,monospace;font-size:9.5px;font-weight:700;
+  padding:1.5px 6px;border-radius:5px;white-space:nowrap}
+.mini-chip.idb{color:#8ab4f8;background:rgba(66,133,244,.13)}
+.mini-chip.ls{color:#ff8a93;background:rgba(255,27,45,.12)}
+
+/* ---------- Dropzone ---------- */
+.dropzone{border:1.5px dashed var(--line2);border-radius:16px;background:var(--inset);
+  padding:40px 20px;text-align:center;cursor:pointer;transition:.2s;user-select:none}
+.dropzone:hover{border-color:#43507a}
+.dropzone.drag{border-color:var(--blue);background:rgba(66,133,244,.08);
+  box-shadow:0 0 0 4px rgba(66,133,244,.12) inset}
+.dropzone svg.up{width:46px;height:46px;color:#7aa7ff;margin-bottom:10px}
+.dropzone strong{font-size:15.5px;display:block}
+.dropzone .or{margin:6px 0 12px}
+.dropzone .types{margin-top:14px;font-size:11.5px}
+
+/* ---------- Grid dokumen ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:14px}
+.fcard{background:var(--card2);border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  display:flex;flex-direction:column;transition:.18s;animation:fade .3s ease}
+.fcard:hover{border-color:#3a4468;transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.thumb{height:110px;display:flex;align-items:center;justify-content:center;
+  background:var(--inset);border-bottom:1px solid var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.badge-ext{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12.5px;letter-spacing:.4px}
+.fc-body{padding:12px 13px 13px;display:flex;flex-direction:column;gap:7px;flex:1}
+.fc-name{font-size:13.5px;font-weight:600;line-height:1.35;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fc-meta{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.fc-actions{margin-top:auto;display:flex;gap:7px;flex-wrap:wrap;padding-top:4px}
+
+/* ---------- Catatan ---------- */
+.note-editor{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.note-editor textarea{min-height:92px;resize:vertical}
+.note-editor .row{display:flex;justify-content:flex-end}
+.ncard{background:var(--card2);border:1px solid var(--line);border-radius:13px;
+  padding:13px 15px;margin-bottom:11px;animation:fade .3s ease}
+.ncard-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ncard-head .ndate{font-size:11.5px;color:var(--muted)}
+.ncard-head .btn{margin-left:auto}
+.ncard-text{margin-top:7px;font-size:13.5px;white-space:pre-wrap;word-break:break-word}
+
+/* ---------- Status kosong ---------- */
+.empty{border:1.5px dashed var(--line2);border-radius:14px;padding:30px 16px;text-align:center;
+  color:var(--muted);font-size:13.5px}
+.empty svg{width:34px;height:34px;display:block;margin:0 auto 9px;opacity:.55}
+[hidden]{display:none!important}
+
+/* ---------- Footer ---------- */
+footer{margin:30px 0 44px}
+.foot-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.foot-card h3{font-size:15px;margin-bottom:10px}
+.compat-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+
+/* ---------- Toast ---------- */
+#toastWrap{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:9px;z-index:99}
+.toast{background:#171b2a;border:1px solid var(--line2);border-left:3px solid var(--green);
+  padding:12px 16px;border-radius:11px;font-size:13.5px;max-width:340px;
+  box-shadow:0 12px 30px rgba(0,0,0,.45);animation:slide .28s ease}
+.toast.err{border-left-color:var(--red)} .toast.warn{border-left-color:var(--amber)}
+.toast.out{opacity:0;transform:translateX(14px);transition:.32s}
+@keyframes slide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+
+/* ---------- Modal pratinjau (HUD futuristik) ---------- */
+.pv-backdrop{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+  padding:26px;background:rgba(4,6,11,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:pvFade .25s ease}
+.pv-backdrop[hidden]{display:none}
+.pv-modal{position:relative;width:min(980px,94vw);height:min(88vh,860px);display:flex;flex-direction:column;
+  background:linear-gradient(160deg,#141826,#10131d 55%,#161228);border:1px solid var(--line2);border-radius:18px;
+  box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 60px rgba(66,133,244,.15),0 0 90px rgba(255,27,45,.09);
+  overflow:hidden;animation:pvPop .32s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes pvFade{from{opacity:0}to{opacity:1}}
+@keyframes pvPop{from{opacity:0;transform:translateY(26px) scale(.94)}to{opacity:1;transform:none}}
+.pv-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
+  background:var(--grad);background-size:200% 100%;animation:pvSlide 3s linear infinite}
+@keyframes pvSlide{from{background-position:0 0}to{background-position:200% 0}}
+.pv-corner{position:absolute;width:26px;height:26px;z-index:4;pointer-events:none;opacity:.95}
+.pv-corner.tl{top:10px;left:10px;border-top:2px solid #7aa7ff;border-left:2px solid #7aa7ff;border-top-left-radius:9px}
+.pv-corner.tr{top:10px;right:10px;border-top:2px solid #ff8a93;border-right:2px solid #ff8a93;border-top-right-radius:9px}
+.pv-corner.bl{bottom:10px;left:10px;border-bottom:2px solid #ff8a93;border-left:2px solid #ff8a93;border-bottom-left-radius:9px}
+.pv-corner.br{bottom:10px;right:10px;border-bottom:2px solid #7aa7ff;border-right:2px solid #7aa7ff;border-bottom-right-radius:9px}
+.pv-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:16px 20px 14px;
+  border-bottom:1px solid var(--line);position:relative;z-index:2;background:rgba(10,12,19,.5)}
+.pv-filemeta{min-width:0}
+.pv-name{font-weight:700;font-size:14.5px;word-break:break-word;line-height:1.3}
+.pv-sub{font-size:11.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.pv-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pv-body{position:relative;flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px}
+.pv-body::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(rgba(66,133,244,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(66,133,244,.05) 1px,transparent 1px);
+  background-size:34px 34px;animation:pvGrid 14s linear infinite}
+@keyframes pvGrid{from{background-position:0 0}to{background-position:34px 34px}}
+.pv-media{max-width:100%;max-height:100%;border-radius:12px;position:relative;z-index:1;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);background:#0a0c12}
+img.pv-media{object-fit:contain;cursor:zoom-in;transition:transform .25s ease}
+img.pv-media:hover{transform:scale(1.015)}
+.pv-zoom img.pv-media{max-width:none;max-height:none;cursor:zoom-out}
+iframe.pv-media{width:100%;height:100%;border:0;background:#fff}
+video.pv-media{width:min(720px,100%)}
+audio.pv-media{width:min(520px,92%);padding:18px;border:1px solid var(--line2);background:var(--card2)}
+.pv-code{position:relative;z-index:1;align-self:stretch;width:100%;max-height:100%;overflow:auto;
+  background:rgba(10,12,19,.9);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  font-family:ui-monospace,'Cascadia Mono',Consolas,'Courier New',monospace;font-size:12.8px;line-height:1.6;
+  color:#c9d4f2;white-space:pre;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.pv-tablewrap{position:relative;z-index:1;align-self:stretch;width:100%;overflow:auto;max-height:100%;
+  border:1px solid var(--line);border-radius:12px;background:rgba(10,12,19,.9);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
+.pv-table th{position:sticky;top:0;background:linear-gradient(135deg,rgba(66,133,244,.3),rgba(255,27,45,.2));
+  color:#eaf0ff;font-weight:700;text-align:left;padding:9px 13px;border-bottom:1px solid var(--line2);white-space:nowrap}
+.pv-table td{padding:8px 13px;border-bottom:1px solid var(--line);color:#c9d4f2;white-space:nowrap}
+.pv-table tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.pv-trunc{position:relative;z-index:1;margin-top:10px;text-align:center;font-size:11.5px;color:var(--muted)}
+.pv-none{position:relative;z-index:1;text-align:center;max-width:470px;padding:34px 26px;
+  border:1px dashed var(--line2);border-radius:16px;background:rgba(14,17,25,.72)}
+.pv-none .big{font-size:44px;line-height:1;margin-bottom:12px}
+.pv-none h4{font-size:15.5px;margin-bottom:7px}
+.pv-none p{font-size:13px;color:var(--muted)}
+.pv-note{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:2;
+  font-size:10px;letter-spacing:1.8px;color:#5f6a8a;pointer-events:none;white-space:nowrap}
+.pv-spin{width:46px;height:46px;border-radius:50%;border:3px solid rgba(66,133,244,.2);
+  border-top-color:var(--blue);animation:pvSpin .8s linear infinite;position:relative;z-index:1}
+@keyframes pvSpin{to{transform:rotate(360deg)}}
+
+/* ---------- Editor Kode (gaya Acode) ---------- */
+.engine-chip.ed{color:#5fe3a5;background:rgba(61,214,140,.13);border:1px solid rgba(61,214,140,.4)}
+.ed-toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ed-name{font:inherit;color:var(--text);background:var(--inset);border:1px solid var(--line2);
+  border-radius:10px;padding:9px 12px;width:210px}
+.ed-name:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(66,133,244,.18)}
+.ed-toolbar select{font:inherit;font-weight:600;color:var(--text);background:var(--inset);
+  border:1px solid var(--line2);border-radius:10px;padding:9px 12px;cursor:pointer}
+.ed-toolbar select:focus{outline:none;border-color:var(--blue)}
+.ed-auto{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);user-select:none}
+.ed-auto input{accent-color:#4285f4;width:15px;height:15px;cursor:pointer}
+.ed-split{display:flex;gap:14px;align-items:stretch}
+.ed-main{flex:1.15;min-width:0}
+.ed-wrap{display:flex;height:400px;border:1px solid var(--line2);border-radius:12px;
+  overflow:hidden;background:#0a0c12}
+.ed-gutter{background:#0d1019;border-right:1px solid var(--line);width:46px;flex:none;
+  overflow:hidden;user-select:none}
+.ed-gutter pre{margin:0;padding:12px 9px 12px 0;text-align:right;color:#4a5470;white-space:pre}
+.ed-code{position:relative;flex:1;min-width:0}
+.ed-hl{position:absolute;inset:0;margin:0;padding:12px 14px;overflow:hidden;
+  white-space:pre;color:#c9d4f2;pointer-events:none}
+.ed-code textarea{position:absolute;inset:0;width:100%;height:100%;resize:none;border:0;
+  background:transparent;color:transparent;caret-color:#fff;padding:12px 14px;
+  white-space:pre;overflow:auto;outline:none}
+.ed-code textarea::placeholder{color:#5f6a8a}
+.ed-code textarea::selection{background:rgba(66,133,244,.35);color:transparent}
+.ed-code textarea,.ed-hl,.ed-gutter pre{font-family:ui-monospace,'Cascadia Mono',Consolas,'Courier New',monospace;
+  font-size:12.8px;line-height:1.6;tab-size:2}
+.ed-status{display:flex;gap:14px;align-items:center;margin-top:9px;font-size:11.5px;
+  color:var(--muted);flex-wrap:wrap}
+.ed-status .okmark{color:#5fe3a5}
+.tok-com{color:#5b6580;font-style:italic}
+.tok-str{color:#fbd75b}
+.tok-doc{color:#c58af9}
+.tok-tag{color:#7aa7ff}
+.tok-at{color:#c58af9}
+.tok-prop{color:#8ab4f8}
+.tok-num{color:#5fe3a5}
+.tok-key{color:#7aa7ff}
+.tok-lit{color:#c58af9}
+.tok-fn{color:#80deea}
+.tok-tstr{color:#5fe3a5}
+.tok-dec{color:#ffa94d}
+.tok-mkey{color:#8ab4f8;font-weight:600}
+.tok-code{color:#5fe3a5}
+.tok-h{color:#7aa7ff;font-weight:700}
+.tok-b{color:#fbd75b;font-weight:700}
+.tok-i{color:#c9d4f2;font-style:italic}
+.tok-link{color:#80deea;text-decoration:underline}
+.tok-li{color:#ffa94d}
+.ed-preview{flex:1;min-width:0;display:flex;flex-direction:column;
+  border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:#0a0c12}
+.ed-mini-head{display:flex;align-items:center;gap:9px;padding:9px 12px;
+  border-bottom:1px solid var(--line);background:rgba(10,12,19,.6);flex-wrap:wrap}
+.ed-mini-head strong{font-size:13px}
+.ed-ptools{margin-left:auto;display:flex;gap:8px}
+.ed-preview-body{position:relative;flex:1;min-height:340px}
+#edFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.ed-console{position:absolute;inset:0;margin:0;overflow:auto;padding:12px 14px;
+  font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word}
+.ed-console .c-log{color:#c9d4f2}
+.ed-console .c-info{color:#8ab4f8}
+.ed-console .c-warn{color:#fbd75b}
+.ed-console .c-error{color:#ff8a93}
+.ed-console .c-ok{color:#5fe3a5}
+
+@media(max-width:620px){
+  .pv-backdrop{padding:10px}
+  .pv-modal{height:92vh}
+  .pv-actions{width:100%;margin-left:0}
+  .ed-split{flex-direction:column}
+  .ed-wrap{height:320px}
+  .ed-name{width:100%}
+  .header-side{margin-left:0}
+  input[type=search]{max-width:none}
+  .tools input[type=search]{flex:1;width:auto;max-width:none}
+  .tools{width:100%}
+  .dropzone{padding:30px 14px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12v7c0 1.66 3.58 3 8 3s8-1.34 8-3v-7"/></svg>
+      </div>
+      <div>
+        <h1>StorageKu</h1>
+        <p class="subtitle" data-i18n="subtitle">Unggah &amp; simpan dokumen langsung di browser — tanpa server. Data tetap ada walau browser ditutup.</p>
+      </div>
+      <div class="header-side">
+        <span class="badge"><span class="dot" style="background:#4285f4"></span>Chrome <span class="ok">✓</span></span>
+        <span class="badge"><span class="dot" style="background:#ff1b2d"></span>Opera <span class="ok">✓</span></span>
+        <button id="langToggle" class="btn ghost small" title="Ganti bahasa / Switch language">🌐 EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= STATISTIK ================= -->
+    <section class="stats" aria-label="Ringkasan penyimpanan">
+      <div class="stat">
+        <div class="ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div><div class="num" id="statFiles">0</div><div class="lbl" data-i18n="statFiles">Dokumen tersimpan</div></div>
+      </div>
+      <div class="stat">
+        <div class="ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg></div>
+        <div><div class="num" id="statSize">0 B</div><div class="lbl" data-i18n="statSize">Total ukuran file</div></div>
+      </div>
+      <div class="stat">
+        <div class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div><div class="num" id="statNotes">0</div><div class="lbl" data-i18n="statNotes">Catatan teks tersimpan</div></div>
+      </div>
+    </section>
+
+    <!-- ================= UNGGAH ================= -->
+    <section class="card">
+      <div class="section-head">
+        <h2 data-i18n="uploadTitle">Unggah Dokumen &amp; Data</h2>
+      </div>
+      <p class="hint" data-i18n="uploadHint">File disimpan utuh ke IndexedDB — basis data bawaan Chrome &amp; Opera. Tidak ada yang dikirim ke internet.</p>
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Area unggah file">
+        <svg class="up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><polyline points="8 17 12 13 16 17"/><line x1="12" y1="13" x2="12" y2="22"/></svg>
+        <strong data-i18n="dzMain">Tarik &amp; letakkan file di sini</strong>
+        <p class="muted small or" data-i18n="dzOr">atau</p>
+        <button id="browseBtn" class="btn primary" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+          <span data-i18n="btnBrowse">Pilih File</span>
+        </button>
+        <p class="muted small types" data-i18n="dzTypes">Format utama: PDF · DOCX · XLSX · CSV · JSON · TXT · PPTX · ZIP — gambar juga didukung</p>
+      </div>
+      <input type="file" id="fileInput" multiple hidden>
+    </section>
+
+    <!-- ================= DOKUMEN (IndexedDB) ================= -->
+    <section class="card">
+      <div class="section-head">
+        <h2>
+          <span class="engine-chip idb">IndexedDB</span>
+          <span data-i18n="filesTitle">Dokumen Tersimpan</span>
+          <span class="count" id="fileCount">0</span>
+        </h2>
+        <div class="tools">
+          <input type="search" id="fileSearch" data-i18n-ph="searchPhFiles" placeholder="Cari dokumen…">
+          <button id="deleteAllFiles" class="btn danger small" data-i18n="btnDelAll">Hapus Semua</button>
+        </div>
+      </div>
+      <div id="fileGrid" class="grid"></div>
+      <div id="fileEmpty" class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        <span id="fileEmptyText">Belum ada dokumen.</span>
+      </div>
+    </section>
+
+    <!-- ================= CATATAN (localStorage) ================= -->
+    <section class="card">
+      <div class="section-head">
+        <h2>
+          <span class="engine-chip ls">localStorage</span>
+          <span data-i18n="notesTitle">Catatan Teks</span>
+          <span class="count" id="notesCount">0</span>
+        </h2>
+        <div class="tools">
+          <input type="search" id="noteSearch" data-i18n-ph="searchPhNotes" placeholder="Cari catatan…">
+          <button id="deleteAllNotes" class="btn danger small" data-i18n="btnDelAll">Hapus Semua</button>
+        </div>
+      </div>
+      <p class="hint" data-i18n="notesHint">Catatan disimpan di localStorage (kapasitas ±5 MB) — ideal untuk teks singkat.</p>
+      <div class="note-editor">
+        <textarea id="noteText" data-i18n-ph="notePh" placeholder="Tulis catatan di sini…"></textarea>
+        <div class="row">
+          <button id="saveNote" class="btn primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span data-i18n="btnSaveNote">Simpan Catatan</span>
+          </button>
+        </div>
+      </div>
+      <div id="noteList"></div>
+      <div id="noteEmpty" class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="noteEmptyText">Belum ada catatan.</span>
+      </div>
+    </section>
+  <!-- ================= EDITOR KODE (ACODE) ================= -->
+  <section class="card" id="editorCard">
+    <div class="section-head">
+      <h2><span class="engine-chip ed">ACODE</span><span data-i18n="edTitle">Editor Kode</span><span class="count" id="edLangChip">HTML</span></h2>
+    </div>
+    <p class="hint" data-i18n="edHint">Tulis kode seperti di Acode — pratinjau langsung di samping, simpan ke Dokumen, atau unduh. Draf tersimpan otomatis di browser.</p>
+    <div class="ed-toolbar">
+      <input id="edName" class="ed-name" data-i18n-ph="edNamePh" placeholder="nama-file">
+      <select id="edLang" aria-label="Bahasa pemrograman">
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="js">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="json">JSON</option>
+        <option value="md">Markdown</option>
+        <option value="plain" data-ed-plain>Teks</option>
+      </select>
+      <span class="ed-auto"><input type="checkbox" id="edAuto" checked><label for="edAuto" data-i18n="edAuto">Otomatis</label></span>
+      <div class="tools">
+        <button id="edNew" class="btn ghost small" data-i18n="edNew">Baru</button>
+        <button id="edExample" class="btn ghost small" data-i18n="edExample">Contoh</button>
+        <button id="edSaveDoc" class="btn ghost small" data-i18n="edSaveDoc">Simpan ke Dokumen</button>
+        <button id="edDownload" class="btn ghost small"><span data-i18n="btnDownload">Unduh</span></button>
+        <button id="edRun" class="btn primary small">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <span id="edRunText">Pratinjau</span>
+        </button>
+      </div>
+    </div>
+    <div class="ed-split">
+      <div class="ed-main">
+        <div class="ed-wrap">
+          <div class="ed-gutter"><pre id="edLines">1</pre></div>
+          <div class="ed-code">
+            <pre id="edHl" class="ed-hl" aria-hidden="true"></pre>
+            <textarea id="edText" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" data-i18n-ph="edPlaceholder" placeholder="Tulis kode Anda di sini…"></textarea>
+          </div>
+        </div>
+        <div class="ed-status"><span id="edCount">0 baris · 0 karakter</span><span id="edDraftInfo"></span></div>
+      </div>
+      <div class="ed-preview" id="edPreviewPanel" hidden>
+        <div class="ed-mini-head">
+          <strong data-i18n="edPreviewTitle">Pratinjau</strong>
+          <span class="mini-chip idb" id="edPrevLang">HTML</span>
+          <div class="ed-ptools">
+            <button id="edRefresh" class="btn ghost small" data-i18n="edRefresh">Segarkan</button>
+            <button id="edPreviewClose" class="btn danger small" data-i18n="pvClose">Tutup</button>
+          </div>
+        </div>
+        <div class="ed-preview-body">
+          <iframe id="edFrame" sandbox="allow-scripts allow-modals allow-forms" title="Pratinjau kode"></iframe>
+          <pre id="edConsole" class="ed-console" hidden></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer>
+    <div class="foot-card">
+      <h3 data-i18n="footerTitle">Kompatibilitas Browser</h3>
+      <div class="compat-row">
+        <span class="badge"><span class="dot" style="background:#4285f4"></span>Google Chrome <span class="ok">✓</span></span>
+        <span class="badge"><span class="dot" style="background:#ff1b2d"></span>Opera <span class="ok">✓</span></span>
+      </div>
+      <p class="muted small" data-i18n="footerText">Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ &amp; Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ &amp; Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser &amp; profil yang dipakai, dan tidak pernah dikirim ke server mana pun.</p>
+      <p class="muted small" style="margin-top:9px;opacity:.75">v1.2 · pratinjau futuristik + editor kode gaya Acode / futuristic preview + Acode-style code editor</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ================= MODAL PRATINJAU ================= -->
+<div id="pvBackdrop" class="pv-backdrop" hidden>
+  <div class="pv-modal" role="dialog" aria-modal="true" aria-label="Pratinjau file">
+    <span class="pv-corner tl"></span><span class="pv-corner tr"></span>
+    <span class="pv-corner bl"></span><span class="pv-corner br"></span>
+    <div class="pv-head">
+      <div class="pv-filemeta">
+        <div class="pv-name" id="pvName">—</div>
+        <div class="pv-sub" id="pvSub"></div>
+      </div>
+      <div class="pv-actions">
+        <button id="pvNewTab" class="btn ghost small">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span data-i18n="pvNewTab">Tab Baru</span>
+        </button>
+        <button id="pvDownload" class="btn primary small">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span data-i18n="btnDownload">Unduh</span>
+        </button>
+        <button id="pvClose" class="btn danger small">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span data-i18n="pvClose">Tutup</span>
+        </button>
+      </div>
+    </div>
+    <div class="pv-body" id="pvBody"></div>
+    <div class="pv-note">STORAGEKU · PRATINJAU LOKAL · TANPA SERVER</div>
+  </div>
+</div>
+
+<div id="toastWrap" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s);};
+
+/* ================= KAMUS DWIBAHASA (ID ⇄ EN) ================= */
+var I18N={
+id:{
+  subtitle:'Unggah & simpan dokumen langsung di browser — tanpa server. Data tetap ada walau browser ditutup.',
+  statFiles:'Dokumen tersimpan', statSize:'Total ukuran file', statNotes:'Catatan teks tersimpan',
+  uploadTitle:'Unggah Dokumen & Data',
+  uploadHint:'File disimpan utuh ke IndexedDB — basis data bawaan Chrome & Opera. Tidak ada yang dikirim ke internet.',
+  dzMain:'Tarik & letakkan file di sini', dzOr:'atau', btnBrowse:'Pilih File',
+  dzTypes:'Format utama: PDF · DOCX · XLSX · CSV · JSON · HTML · CSS · JS · PY · ZIP — banyak lagi; gambar juga didukung',
+  filesTitle:'Dokumen Tersimpan', searchPhFiles:'Cari dokumen…', btnDelAll:'Hapus Semua',
+  emptyFiles:'Belum ada dokumen — unggah file pertama Anda lewat area unggah di atas.',
+  emptyFilesSearch:'Tidak ada dokumen yang cocok dengan pencarian.',
+  notesTitle:'Catatan Teks', notesHint:'Catatan disimpan di localStorage (kapasitas ±5 MB) — ideal untuk teks singkat.',
+  notePh:'Tulis catatan di sini, lalu klik "Simpan Catatan"…', btnSaveNote:'Simpan Catatan',
+  searchPhNotes:'Cari catatan…',
+  emptyNotes:'Belum ada catatan — tulis catatan pertama Anda di atas.',
+  emptyNotesSearch:'Tidak ada catatan yang cocok dengan pencarian.',
+  btnDownload:'Unduh', btnView:'Pratinjau', btnDelete:'Hapus',
+  pvClose:'Tutup', pvNewTab:'Tab Baru', pvCol:'Kolom',
+  pvUnsupportedTitle:'Pratinjau Tidak Tersedia',
+  pvUnsupportedDesc:function(x){return 'Format .'+x+' tidak bisa ditampilkan langsung oleh browser. Unduh file untuk membukanya dengan aplikasi yang sesuai.';},
+  pvLoadError:'Gagal membaca isi file untuk pratinjau.',
+  pvCsvTrunc:function(n){return 'Menampilkan 300 baris pertama — '+n+' baris lainnya tidak ditampilkan.';},
+  pvTxtTrunc:'Menampilkan 200.000 karakter pertama.',
+  edTitle:'Editor Kode',
+  edHint:'Tulis kode seperti di Acode — pratinjau langsung di samping, simpan ke Dokumen, atau unduh. Draf tersimpan otomatis di browser.',
+  edAuto:'Otomatis', edNew:'Baru', edExample:'Contoh', edSaveDoc:'Simpan ke Dokumen',
+  edRunPreview:'Pratinjau', edRunJs:'Jalankan', edPreviewTitle:'Pratinjau', edRefresh:'Segarkan',
+  edPlainOpt:'Teks', edNamePh:'nama-file', edPlaceholder:'Tulis kode Anda di sini…',
+  edEmptyCode:'Editor masih kosong — tulis kode dulu atau muat Contoh.',
+  edConfirmNew:'Ganti isi editor? Isi saat ini akan terganti.',
+  edSavedAt:function(s){return 'Draf tersimpan otomatis · '+s;},
+  edSavedDoc:function(n){return 'Kode tersimpan sebagai "'+n+'" di Dokumen.';},
+  edOpened:'Dibuka di Editor Kode.',
+  edLines:'baris', edChars:'karakter',
+  edPyLoading:'Memuat mesin Python (Pyodide ±10 MB — butuh internet)…',
+  edPyDone:'Selesai — program berjalan tanpa error.',
+  edPyError:'Mesin Python tidak dapat dimuat — periksa koneksi internet lalu coba lagi.',
+  btnEdit:'Edit',
+  footerTitle:'Kompatibilitas Browser',
+  footerText:'Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ & Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ & Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser & profil yang dipakai, dan tidak pernah dikirim ke server mana pun.',
+  confirmDelFile:function(n){return 'Hapus file "'+n+'"?';},
+  confirmDelAllFiles:'Hapus SEMUA dokumen yang tersimpan? Tindakan ini tidak bisa dibatalkan.',
+  confirmDelNote:'Hapus catatan ini?',
+  confirmDelAllNotes:'Hapus SEMUA catatan? Tindakan ini tidak bisa dibatalkan.',
+  toastSaved:function(n){return n+' file tersimpan di IndexedDB';},
+  toastNoteSaved:'Catatan tersimpan di localStorage',
+  toastDeleted:'Data dihapus.',
+  toastEmptyNote:'Catatan masih kosong.',
+  toastTooBig:'Ukuran file melebihi 250 MB — terlalu besar untuk penyimpanan browser.',
+  toastIsFolder:'Folder tidak didukung — pilih file saja.',
+  toastDbError:'Gagal membuka IndexedDB. Pastikan browser tidak memblokir penyimpanan situs.',
+  toastLsFull:'Penyimpanan localStorage penuh (±5 MB). Hapus beberapa catatan lama.'
+},
+en:{
+  subtitle:'Upload & store documents right in your browser — no server involved. Data survives browser restarts.',
+  statFiles:'Stored documents', statSize:'Total file size', statNotes:'Saved text notes',
+  uploadTitle:'Upload Documents & Data',
+  uploadHint:'Files are stored intact into IndexedDB — the built-in database of Chrome & Opera. Nothing is sent to the internet.',
+  dzMain:'Drag & drop your files here', dzOr:'or', btnBrowse:'Browse Files',
+  dzTypes:'Main formats: PDF · DOCX · XLSX · CSV · JSON · HTML · CSS · JS · PY · ZIP — and many more; images are supported too',
+  filesTitle:'Stored Documents', searchPhFiles:'Search documents…', btnDelAll:'Delete All',
+  emptyFiles:'No documents yet — upload your first file using the drop zone above.',
+  emptyFilesSearch:'No documents match your search.',
+  notesTitle:'Text Notes', notesHint:'Notes are kept in localStorage (~5 MB capacity) — ideal for short text.',
+  notePh:'Write a note here, then click "Save Note"…', btnSaveNote:'Save Note',
+  searchPhNotes:'Search notes…',
+  emptyNotes:'No notes yet — write your first note above.',
+  emptyNotesSearch:'No notes match your search.',
+  btnDownload:'Download', btnView:'Preview', btnDelete:'Delete',
+  pvClose:'Close', pvNewTab:'New Tab', pvCol:'Column',
+  pvUnsupportedTitle:'Preview Not Available',
+  pvUnsupportedDesc:function(x){return 'The .'+x+' format cannot be displayed natively by the browser. Download the file to open it with the appropriate application.';},
+  pvLoadError:'Failed to read the file contents for preview.',
+  pvCsvTrunc:function(n){return 'Showing the first 300 rows — '+n+' more rows are hidden.';},
+  pvTxtTrunc:'Showing the first 200,000 characters.',
+  edTitle:'Code Editor',
+  edHint:'Write code Acode-style — live preview on the side, save to Documents, or download. Drafts auto-save in your browser.',
+  edAuto:'Auto', edNew:'New', edExample:'Example', edSaveDoc:'Save to Documents',
+  edRunPreview:'Preview', edRunJs:'Run', edPreviewTitle:'Preview', edRefresh:'Refresh',
+  edPlainOpt:'Plain', edNamePh:'file-name', edPlaceholder:'Write your code here…',
+  edEmptyCode:'The editor is empty — write some code or load the Example.',
+  edConfirmNew:'Replace the editor content? The current content will be lost.',
+  edSavedAt:function(s){return 'Draft auto-saved · '+s;},
+  edSavedDoc:function(n){return 'Code saved as "'+n+'" in Documents.';},
+  edOpened:'Opened in Code Editor.',
+  edLines:'lines', edChars:'chars',
+  edPyLoading:'Loading the Python engine (Pyodide ±10 MB — internet required)…',
+  edPyDone:'Done — the program ran without errors.',
+  edPyError:'The Python engine could not be loaded — check your internet connection and try again.',
+  btnEdit:'Edit',
+  footerTitle:'Browser Compatibility',
+  footerText:'Built with standard web APIs and optimized for Google Chrome and Opera (both Chromium-based). localStorage has been available since Chrome 4+ & Opera 10.5+, and IndexedDB since Chrome 24+ & Opera 15+. All data stays local on your device, bound to the browser profile you use — it is never sent to any server.',
+  confirmDelFile:function(n){return 'Delete file "'+n+'"?';},
+  confirmDelAllFiles:'Delete ALL stored documents? This cannot be undone.',
+  confirmDelNote:'Delete this note?',
+  confirmDelAllNotes:'Delete ALL notes? This cannot be undone.',
+  toastSaved:function(n){return n+' file(s) saved to IndexedDB';},
+  toastNoteSaved:'Note saved to localStorage',
+  toastDeleted:'Data deleted.',
+  toastEmptyNote:'The note is empty.',
+  toastTooBig:'File exceeds 250 MB — too large for browser storage.',
+  toastIsFolder:'Folders are not supported — please select files.',
+  toastDbError:'Failed to open IndexedDB. Make sure the browser does not block site storage.',
+  toastLsFull:'localStorage is full (~5 MB). Delete some old notes.'
+}};
+
+/* ================= STATE ================= */
+var DB_NAME='storagekuDB', STORE='files';
+var NOTES_KEY='storageku_notes_v1', LANG_KEY='storageku_lang';
+var MAX_FILE=250*1024*1024;
+var db=null, files=[], notes=[];
+var dbFailed=false;
+var lang='id';
+try{ lang=localStorage.getItem(LANG_KEY)==='en'?'en':'id'; }catch(e){}
+
+/* ================= UTIL ================= */
+function uid(){return (crypto&&crypto.randomUUID)?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(36).slice(2,10);}
+function fmtSize(b){if(!b)return '0 B';var u=['B','KB','MB','GB','TB'];var i=Math.min(Math.floor(Math.log(b)/Math.log(1024)),u.length-1);var v=b/Math.pow(1024,i);return (i===0?String(v):(v>=100?v.toFixed(0):v.toFixed(1)))+' '+u[i];}
+function fmtDate(iso){var d=new Date(iso),loc=lang==='id'?'id-ID':'en-US';
+  return d.toLocaleDateString(loc,{day:'numeric',month:'short',year:'numeric'})+' · '+d.toLocaleTimeString(loc,{hour:'2-digit',minute:'2-digit'});}
+function hexA(h,a){var v=h.replace('#','');return 'rgba('+parseInt(v.slice(0,2),16)+','+parseInt(v.slice(2,4),16)+','+parseInt(v.slice(4,6),16)+','+a+')';}
+function extOf(name){var m=/\.([a-z0-9]+)$/i.exec(name);return m?m[1].toLowerCase():'';}
+var EXT_MAP={pdf:['PDF','#ff5370'],doc:['DOC','#5b9bff'],docx:['DOCX','#5b9bff'],odt:['ODT','#5b9bff'],
+  rtf:['RTF','#5b9bff'],xls:['XLS','#3dd68c'],xlsx:['XLSX','#3dd68c'],csv:['CSV','#3dd68c'],
+  ppt:['PPT','#ffa94d'],pptx:['PPTX','#ffa94d'],json:['JSON','#fbd75b'],xml:['XML','#fbd75b'],sql:['SQL','#fbd75b'],
+  txt:['TXT','#a8b3cf'],md:['MD','#a8b3cf'],log:['LOG','#a8b3cf'],
+  zip:['ZIP','#c58af9'],rar:['RAR','#c58af9'],'7z':['7Z','#c58af9'],
+  html:['HTML','#ff8a80'],css:['CSS','#80deea'],js:['JS','#ffe082'],
+  mp3:['MP3','#f06292'],wav:['WAV','#f06292'],mp4:['MP4','#7986cb'],mov:['MOV','#7986cb'],
+  png:['PNG','#c58af9'],jpg:['JPG','#c58af9'],jpeg:['JPG','#c58af9'],gif:['GIF','#c58af9'],webp:['WEBP','#c58af9'],svg:['SVG','#c58af9'],
+  py:['PY','#3776ab'],ts:['TS','#3178c6'],java:['JAVA','#e76f00'],c:['C','#9fb6cd'],cpp:['C++','#f34b7d'],
+  cs:['C#','#178600'],go:['GO','#00add8'],rs:['RS','#dea584'],rb:['RB','#cc342d'],php:['PHP','#777bb4'],
+  swift:['SWIFT','#f05138'],kt:['KT','#a97bff'],dart:['DART','#00b4ab'],lua:['LUA','#4f6db3'],
+  sh:['SH','#89e051'],bat:['BAT','#89e051'],ps1:['PS1','#5391fe'],yml:['YML','#fbd75b'],yaml:['YAML','#fbd75b'],
+  ipynb:['IPYNB','#f37726'],vue:['VUE','#42b883'],toml:['TOML','#fbd75b'],env:['ENV','#89e051']};
+function badgeFor(rec){
+  if(rec.thumb)return null;
+  var e=extOf(rec.name);
+  if(EXT_MAP[e])return EXT_MAP[e];
+  if(rec.type&&rec.type.indexOf('image/')===0)return ['IMG','#c58af9'];
+  if(rec.type&&rec.type.indexOf('audio/')===0)return ['AUDIO','#f06292'];
+  if(rec.type&&rec.type.indexOf('video/')===0)return ['VIDEO','#7986cb'];
+  return ['FILE','#a8b3cf'];
+}
+var ICONS={
+  download:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>'
+};
+
+/* ================= TOAST ================= */
+function toast(msg,type){
+  var w=$('#toastWrap'),el=document.createElement('div');
+  el.className='toast '+(type||'ok');el.textContent=msg;w.appendChild(el);
+  setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove();},350);},3200);
+}
+
+/* ================= INDEXEDDB ================= */
+function openDB(){
+  return new Promise(function(resolve,reject){
+    var rq=indexedDB.open(DB_NAME,1);
+    rq.onupgradeneeded=function(e){var d=e.target.result;
+      if(!d.objectStoreNames.contains(STORE)){var os=d.createObjectStore(STORE,{keyPath:'id'});os.createIndex('date','date');}};
+    rq.onsuccess=function(){resolve(rq.result);};
+    rq.onerror=function(){reject(rq.error);};
+    rq.onblocked=function(){reject(new Error('blocked'));};
+  });
+}
+function idbAll(){return new Promise(function(res,rej){var r=db.transaction(STORE,'readonly').objectStore(STORE).getAll();r.onsuccess=function(){res(r.result||[]);};r.onerror=function(){rej(r.error);};});}
+function idbPut(rec){return new Promise(function(res,rej){var r=db.transaction(STORE,'readwrite').objectStore(STORE).put(rec);r.onsuccess=function(){res();};r.onerror=function(){rej(r.error);};});}
+function idbDelete(id){return new Promise(function(res,rej){var r=db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);r.onsuccess=function(){res();};r.onerror=function(){rej(r.error);};});}
+function idbClear(){return new Promise(function(res,rej){var r=db.transaction(STORE,'readwrite').objectStore(STORE).clear();r.onsuccess=function(){res();};r.onerror=function(){rej(r.error);};});}
+
+/* ================= THUMBNAIL GAMBAR ================= */
+function makeThumb(file){
+  return new Promise(function(resolve){
+    if(!file.type||file.type.indexOf('image/')!==0||file.type==='image/svg+xml')return resolve(null);
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){
+      try{
+        var MAX=360,r=Math.min(MAX/img.naturalWidth,MAX/img.naturalHeight,1);
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.naturalWidth*r));
+        c.height=Math.max(1,Math.round(img.naturalHeight*r));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        resolve(c.toDataURL('image/jpeg',0.82));
+      }catch(e){resolve(null);}finally{URL.revokeObjectURL(url);}
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);resolve(null);};
+    img.src=url;
+  });
+}
+
+/* ================= UNGGAH FILE ================= */
+function looksLikeFolder(f){return (!f.type||f.type==='')&&f.size===0&&!/\.[^./]+$/.test(f.name);}
+function handleFiles(list){
+  var arr=Array.prototype.slice.call(list||[]);
+  if(!arr.length)return Promise.resolve();
+  var t=I18N[lang],saved=0,warned=false;
+  var chain=Promise.resolve();
+  arr.forEach(function(f){
+    chain=chain.then(function(){
+      if(f.size>MAX_FILE){toast(t.toastTooBig,'err');return;}
+      if(looksLikeFolder(f)){if(!warned){toast(t.toastIsFolder,'warn');warned=true;}return;}
+      return makeThumb(f).then(function(thumb){
+        var rec={id:uid(),name:f.name,size:f.size,type:f.type||'',date:new Date().toISOString(),blob:f,thumb:thumb};
+        return idbPut(rec).then(function(){saved++;});
+      });
+    }).catch(function(e){console.error(e);toast(t.toastDbError,'err');});
+  });
+  return chain.then(function(){if(saved){return refreshFiles().then(function(){toast(t.toastSaved(saved),'ok');});}});
+}
+
+/* ================= AKSI FILE ================= */
+function downloadFile(rec){
+  var url=URL.createObjectURL(rec.blob),a=document.createElement('a');
+  a.href=url;a.download=rec.name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},4000);
+}
+/* ================= PRATINJAU FILE (modal futuristik) ================= */
+var pvState={rec:null,url:null};
+var TEXT_EXT={txt:1,md:1,json:1,csv:1,tsv:1,xml:1,sql:1,log:1,html:1,htm:1,css:1,js:1,mjs:1,yml:1,yaml:1,ini:1,conf:1,
+  py:1,ts:1,java:1,c:1,cpp:1,cs:1,go:1,rs:1,rb:1,php:1,swift:1,kt:1,dart:1,lua:1,sh:1,bat:1,ps1:1,toml:1,env:1};
+function canPreview(rec){
+  var type=rec.type||'',e=extOf(rec.name);
+  if(rec.thumb)return true;
+  if(type.indexOf('image/')===0)return true;
+  if(type==='application/pdf'||type.indexOf('text/')===0)return true;
+  if(type.indexOf('audio/')===0||type.indexOf('video/')===0)return true;
+  if(type==='application/json'||type==='application/xml'||type==='application/javascript')return true;
+  return !!TEXT_EXT[e];
+}
+function openPreview(rec){
+  var t=I18N[lang];
+  pvState.rec=rec;
+  $('#pvName').textContent=rec.name;
+  var sub=$('#pvSub');sub.innerHTML='';
+  var chip=document.createElement('span');chip.className='mini-chip idb';chip.textContent='IndexedDB';
+  var st=document.createElement('span');st.textContent=fmtSize(rec.size)+' · '+fmtDate(rec.date);
+  sub.appendChild(chip);sub.appendChild(st);
+  $('#pvDownload').onclick=function(){downloadFile(rec);};
+  $('#pvNewTab').onclick=function(){
+    var u=URL.createObjectURL(rec.blob);window.open(u,'_blank');
+    setTimeout(function(){URL.revokeObjectURL(u);},60000);
+  };
+  $('#pvClose').onclick=closePreview;
+  $('#pvBackdrop').hidden=false;
+  document.body.style.overflow='hidden';
+  renderPreviewBody(rec);
+}
+function closePreview(){
+  var bd=$('#pvBackdrop');
+  if(bd.hidden)return;
+  bd.hidden=true;$('#pvBody').innerHTML='';
+  if(pvState.url){URL.revokeObjectURL(pvState.url);pvState.url=null;}
+  pvState.rec=null;
+  document.body.style.overflow='';
+}
+function pvUrl(rec){
+  if(pvState.url)URL.revokeObjectURL(pvState.url);
+  pvState.url=URL.createObjectURL(rec.blob);
+  return pvState.url;
+}
+function readFileText(blob,ok,fail){
+  var fr=new FileReader();
+  fr.onload=function(){ok(String(fr.result));};
+  fr.onerror=function(){fail();};
+  fr.readAsText(blob);
+}
+function buildCsvTable(txt,delim){
+  var t=I18N[lang];
+  var lines=txt.replace(/\r/g,'').split('\n').filter(function(l){return l.length;});
+  var MAXR=300;
+  var rows=lines.slice(0,MAXR).map(function(l){return l.split(delim);});
+  var cols=rows.length?rows[0].length:0;
+  var wrap=document.createElement('div');wrap.className='pv-tablewrap';
+  var tb=document.createElement('table');tb.className='pv-table';
+  var thead=document.createElement('thead'),trh=document.createElement('tr');
+  for(var c=0;c<cols;c++){var th=document.createElement('th');th.textContent=rows[0][c]||(t.pvCol+' '+(c+1));trh.appendChild(th);}
+  thead.appendChild(trh);tb.appendChild(thead);
+  var tbw=document.createElement('tbody');
+  rows.slice(1).forEach(function(r){
+    var tr=document.createElement('tr');
+    for(var i=0;i<cols;i++){var td=document.createElement('td');td.textContent=r[i]!==undefined?r[i]:'';tr.appendChild(td);}
+    tbw.appendChild(tr);
+  });
+  tb.appendChild(tbw);wrap.appendChild(tb);
+  if(lines.length>MAXR){
+    var p=document.createElement('p');p.className='pv-trunc';p.textContent=t.pvCsvTrunc(lines.length-MAXR);
+    wrap.appendChild(p);
+  }
+  return wrap;
+}
+function showUnsupported(rec,msg){
+  var t=I18N[lang],body=$('#pvBody');
+  var box=document.createElement('div');box.className='pv-none';
+  var big=document.createElement('div');big.className='big';big.textContent='\uD83D\uDEE1\uFE0F';
+  var h=document.createElement('h4');h.textContent=msg||t.pvUnsupportedTitle;
+  var p=document.createElement('p');
+  p.textContent=msg?t.pvUnsupportedTitle:t.pvUnsupportedDesc(extOf(rec.name).toUpperCase()||'FILE');
+  var b=document.createElement('button');b.type='button';b.className='btn primary small';b.style.marginTop='14px';
+  b.innerHTML=ICONS.download;
+  var sp=document.createElement('span');sp.textContent=t.btnDownload;b.appendChild(sp);
+  b.addEventListener('click',function(){downloadFile(rec);});
+  box.appendChild(big);box.appendChild(h);box.appendChild(p);box.appendChild(b);
+  body.appendChild(box);
+}
+function renderPreviewBody(rec){
+  var body=$('#pvBody'),t=I18N[lang];
+  body.className='pv-body';body.innerHTML='';
+  var type=rec.type||'',e=extOf(rec.name);
+  var url=pvUrl(rec);
+  /* gambar (termasuk SVG) */
+  if(rec.thumb||(type&&type.indexOf('image/')===0)){
+    var im=document.createElement('img');im.className='pv-media';im.src=rec.thumb||url;im.alt=rec.name;
+    im.title=t.btnView;im.addEventListener('click',function(){body.classList.toggle('pv-zoom');});
+    im.onerror=function(){body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvLoadError);};
+    body.appendChild(im);return;
+  }
+  /* PDF — ditampilkan oleh penampil PDF bawaan Chrome/Opera */
+  if(type==='application/pdf'||e==='pdf'){
+    var fr=document.createElement('iframe');fr.className='pv-media';fr.src=url;fr.title=rec.name;
+    body.appendChild(fr);return;
+  }
+  /* audio */
+  if(type.indexOf('audio/')===0||['mp3','wav','ogg','oga','m4a','flac'].indexOf(e)!==-1){
+    var au=document.createElement('audio');au.className='pv-media';au.controls=true;au.src=url;
+    body.appendChild(au);return;
+  }
+  /* video */
+  if(type.indexOf('video/')===0||['mp4','webm','mov','mkv','m4v'].indexOf(e)!==-1){
+    var vi=document.createElement('video');vi.className='pv-media';vi.controls=true;vi.src=url;
+    body.appendChild(vi);return;
+  }
+  /* teks / kode / csv / json */
+  if(canPreview(rec)){
+    var s=document.createElement('div');s.className='pv-spin';body.appendChild(s);
+    readFileText(rec.blob,function(txt){
+      body.innerHTML='';body.className='pv-body';
+      if(e==='csv'||e==='tsv'){body.appendChild(buildCsvTable(txt,e==='tsv'?'\t':','));return;}
+      if(e==='json'){try{txt=JSON.stringify(JSON.parse(txt),null,2);}catch(err){}}
+      var pre=document.createElement('pre');pre.className='pv-code';
+      if(txt.length>200000){pre.textContent=txt.slice(0,200000);
+        var p=document.createElement('p');p.className='pv-trunc';p.textContent=t.pvTxtTrunc;
+        body.appendChild(pre);body.appendChild(p);
+      }else{pre.textContent=txt;body.appendChild(pre);}
+    },function(){body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvLoadError);});
+    return;
+  }
+  showUnsupported(rec,null);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closePreview();});
+$('#pvBackdrop').addEventListener('click',function(e){if(e.target===this)closePreview();});
+
+/* ================= RENDER DOKUMEN ================= */
+function renderFiles(){
+  var grid=$('#fileGrid'),t=I18N[lang];
+  grid.innerHTML='';
+  var q=($('#fileSearch').value||'').trim().toLowerCase();
+  var list=files.filter(function(f){return !q||f.name.toLowerCase().indexOf(q)!==-1;})
+                .sort(function(a,b){return b.date.localeCompare(a.date);});
+  $('#fileCount').textContent=files.length;
+  var empty=$('#fileEmpty'),emptyTxt=$('#fileEmptyText');
+  if(!list.length){
+    empty.hidden=false;
+    emptyTxt.textContent=dbFailed?t.toastDbError:(q?t.emptyFilesSearch:t.emptyFiles);
+  }else{empty.hidden=true;}
+  list.forEach(function(rec){
+    var card=document.createElement('article');card.className='fcard';
+    var th=document.createElement('div');th.className='thumb';
+    if(rec.thumb){
+      var im=document.createElement('img');im.src=rec.thumb;im.alt=rec.name;im.loading='lazy';
+      im.title=t.btnView;im.addEventListener('click',function(){openPreview(rec);});
+      th.appendChild(im);
+    }else{
+      var bd=document.createElement('div');bd.className='badge-ext';
+      var info=badgeFor(rec);
+      bd.textContent=info[0];bd.style.color=info[1];
+      bd.style.background=hexA(info[1],.14);bd.style.border='1px solid '+hexA(info[1],.42);
+      th.appendChild(bd);
+    }
+    var body=document.createElement('div');body.className='fc-body';
+    var nm=document.createElement('div');nm.className='fc-name';nm.textContent=rec.name;nm.title=rec.name;
+    var meta=document.createElement('div');meta.className='fc-meta';
+    var chip=document.createElement('span');chip.className='mini-chip idb';chip.textContent='IndexedDB';
+    var mtxt=document.createElement('span');mtxt.textContent=fmtSize(rec.size)+' · '+fmtDate(rec.date);
+    meta.appendChild(chip);meta.appendChild(mtxt);
+    var act=document.createElement('div');act.className='fc-actions';
+    function mkBtn(cls,icon,label,fn){
+      var b=document.createElement('button');b.type='button';b.className='btn small '+cls;
+      b.innerHTML=icon;b.title=label;
+      var sp=document.createElement('span');sp.textContent=label;b.appendChild(sp);
+      b.addEventListener('click',fn);return b;
+    }
+    act.appendChild(mkBtn('ghost',ICONS.download,t.btnDownload,function(){downloadFile(rec);}));
+    if(canPreview(rec))act.appendChild(mkBtn('ghost',ICONS.eye,t.btnView,function(){openPreview(rec);}));
+    if(isTextFile(rec))act.appendChild(mkBtn('ghost',ICONS.edit,t.btnEdit,function(){openInEditor(rec);}));
+    act.appendChild(mkBtn('danger',ICONS.trash,t.btnDelete,function(){
+      if(confirm(t.confirmDelFile(rec.name))){
+        idbDelete(rec.id).then(refreshFiles).then(function(){toast(t.toastDeleted,'ok');});
+      }
+    }));
+    body.appendChild(nm);body.appendChild(meta);body.appendChild(act);
+    card.appendChild(th);card.appendChild(body);
+    grid.appendChild(card);
+  });
+}
+
+/* ================= CATATAN (localStorage) ================= */
+function loadNotes(){try{notes=JSON.parse(localStorage.getItem(NOTES_KEY))||[];}catch(e){notes=[];}}
+function persistNotes(){
+  try{localStorage.setItem(NOTES_KEY,JSON.stringify(notes));return true;}
+  catch(e){notes.pop();toast(I18N[lang].toastLsFull,'err');return false;}
+}
+function renderNotes(){
+  var wrap=$('#noteList'),t=I18N[lang];
+  wrap.innerHTML='';
+  var q=($('#noteSearch').value||'').trim().toLowerCase();
+  var list=notes.filter(function(n){return !q||n.text.toLowerCase().indexOf(q)!==-1;})
+                .sort(function(a,b){return b.date.localeCompare(a.date);});
+  $('#notesCount').textContent=notes.length;
+  var empty=$('#noteEmpty'),emptyTxt=$('#noteEmptyText');
+  if(!list.length){
+    empty.hidden=false;
+    emptyTxt.textContent=q?t.emptyNotesSearch:t.emptyNotes;
+  }else{empty.hidden=true;}
+  list.forEach(function(n){
+    var item=document.createElement('article');item.className='ncard';
+    var head=document.createElement('div');head.className='ncard-head';
+    var chip=document.createElement('span');chip.className='mini-chip ls';chip.textContent='localStorage';
+    var d=document.createElement('span');d.className='ndate';d.textContent=fmtDate(n.date);
+    var del=document.createElement('button');del.type='button';del.className='btn small danger';
+    del.innerHTML=ICONS.trash;del.title=t.btnDelete;
+    var sp=document.createElement('span');sp.textContent=t.btnDelete;del.appendChild(sp);
+    del.addEventListener('click',function(){
+      if(confirm(t.confirmDelNote)){
+        notes=notes.filter(function(x){return x.id!==n.id;});
+        if(persistNotes()){renderNotes();updateStats();toast(t.toastDeleted,'ok');}
+      }
+    });
+    head.appendChild(chip);head.appendChild(d);head.appendChild(del);
+    var body=document.createElement('p');body.className='ncard-text';body.textContent=n.text;
+    item.appendChild(head);item.appendChild(body);
+    wrap.appendChild(item);
+  });
+}
+function saveNote(){
+  var t=I18N[lang],txt=$('#noteText').value.trim();
+  if(!txt){toast(t.toastEmptyNote,'warn');return;}
+  notes.push({id:uid(),text:txt,date:new Date().toISOString()});
+  if(persistNotes()){
+    $('#noteText').value='';renderNotes();updateStats();toast(t.toastNoteSaved,'ok');
+  }
+}
+
+/* ================= EDITOR KODE (gaya Acode) ================= */
+var ED_EXT_LANG={html:'html',htm:'html',css:'css',js:'js',mjs:'js',py:'python',json:'json',md:'md',markdown:'md'};
+var ED_MIME={html:'text/html',css:'text/css',js:'text/javascript',python:'text/x-python',json:'application/json',md:'text/markdown',plain:'text/plain'};
+var ED_EXT_FROM_LANG={html:'html',css:'css',js:'js',python:'py',json:'json',md:'md',plain:'txt'};
+var ED_META={html:'HTML',css:'CSS',js:'JS',python:'PY',json:'JSON',md:'MD',plain:'TXT'};
+var ED_RULES={
+  html:[['com','<!--[\\s\\S]*?-->'],['doc','<![Dd][Oo][Cc][Tt][Yy][Pp][Ee][^>]*>'],['tag','</?[a-zA-Z][\\w-]*'],['str','"[^"\\n]*"|\'[^\'\\n]*\'']],
+  css:[['com','/\\*[\\s\\S]*?\\*/'],['str','"[^"\\n]*"|\'[^\'\\n]*\''],['at','@[\\w-]+'],['prop','[a-zA-Z-]+(?=\\s*:)'],['num','#[0-9a-fA-F]{3,8}\\b|\\b\\d+(?:\\.\\d+)?(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\\b']],
+  js:[['com','//[^\\n]*|/\\*[\\s\\S]*?\\*/'],['str','"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\'|`(?:\\\\.|[^`\\\\])*`'],['key','\\b(?:var|let|const|function|return|if|else|for|while|do|class|new|import|export|from|as|async|await|try|catch|finally|throw|switch|case|break|continue|typeof|instanceof|this|super|extends|yield|delete|void|in|of|default)\\b'],['lit','\\b(?:true|false|null|undefined|NaN|Infinity)\\b'],['num','\\b0[xX][0-9a-fA-F]+\\b|\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b'],['fn','[a-zA-Z_$][\\w$]*(?=\\s*\\()']],
+  python:[['com','#[^\\n]*'],['tstr','"""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\''],['str','"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\''],['key','\\b(?:def|return|if|elif|else|for|while|import|from|as|class|try|except|finally|with|lambda|yield|pass|break|continue|global|nonlocal|assert|raise|in|is|not|and|or|del|async|await|match|case)\\b'],['lit','\\b(?:None|True|False)\\b'],['dec','@[\\w.]+'],['num','\\b\\d+(?:\\.\\d+)?\\b'],['fn','[a-zA-Z_]\\w*(?=\\s*\\()']],
+  json:[['mkey','"(?:\\\\.|[^"\\\\])*"(?=\\s*:)'],['str','"(?:\\\\.|[^"\\\\])*"'],['lit','\\b(?:true|false|null)\\b'],['num','-?\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b']],
+  md:[['code','^`{3,}[\\s\\S]*?`{3,}'],['h','^#{1,6}[^\\n]*'],['b','\\*\\*[^*\\n]+\\*\\*|__[^_\\n]+__'],['i','(?<![\\w*])\\*[^*\\n]+\\*(?![\\w*])'],['link','\\[[^\\]\\n]*\\]\\([^)\\n]*\\)'],['li','^\\s*(?:[-*+]|\\d+\\.)\\s']],
+  plain:[]
+};
+var ED_EXAMPLES={
+  html:'<!DOCTYPE html>\n<html lang="id">\n<head>\n  <meta charset="UTF-8">\n  <title>Halo StorageKu</title>\n  <style>\n    body{font-family:system-ui,sans-serif;padding:28px;background:#f4f6fb}\n    .kartu{background:#fff;border-radius:14px;padding:20px;max-width:420px;box-shadow:0 8px 24px rgba(20,30,80,.12)}\n    button{background:#4285f4;color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}\n  </style>\n</head>\n<body>\n  <div class="kartu">\n    <h1>Halo, dunia! 👋</h1>\n    <p>Ini pratinjau langsung dari Editor Kode StorageKu.</p>\n    <button onclick="sapa()">Klik saya</button>\n  </div>\n  <script>\n    function sapa(){\n      console.log(\'Tombol diklik!\');\n      alert(\'Halo dari StorageKu!\');\n    }\n  <\/script>\n</body>\n</html>',
+  css:'/* Contoh CSS — pratinjau memakai halaman demo */\nbody{background:linear-gradient(135deg,#eef4ff,#fdf0f2)}\n.kartu{background:#fff;border-radius:16px;padding:24px;border:1px solid #e3e9f7;\n  box-shadow:0 12px 30px rgba(30,40,90,.15)}\nh1{color:#4285f4;font-family:system-ui}\nbutton{background:linear-gradient(135deg,#4285f4,#ff1b2d);color:#fff;border:0;\n  padding:10px 18px;border-radius:10px;font-size:15px}',
+  js:'// Contoh JavaScript — hasil muncul di panel Keluaran\nconst nama = "StorageKu";\nlet total = 0;\nfor (let i = 1; i <= 5; i++) {\n  total += i;\n}\nconsole.log("Selamat datang di", nama);\nconsole.log("Jumlah 1..5 =", total);\nconsole.warn("Ini contoh peringatan");\nconsole.error("Ini contoh error (tidak berbahaya)");',
+  python:'# Contoh Python — dijalankan dengan Pyodide (WebAssembly)\nimport math\n\ndef luas_lingkaran(r):\n    return math.pi * r ** 2\n\nfor r in (1, 2.5, 4):\n    print(f"Luas lingkaran r={r}: {luas_lingkaran(r):.2f}")\n\nprint("Nama:", "StorageKu")',
+  json:'{\n  "aplikasi": "StorageKu",\n  "versi": "1.2",\n  "fitur": ["unggah file", "editor kode", "pratinjau langsung"],\n  "aktif": true,\n  "pengguna": {"nama": "Anda", "tahap": "mencoba"}\n}',
+  md:'# Halo StorageKu 👋\n\nIni **Markdown** — pratinjau langsung saat Anda mengetik.\n\n## Daftar fitur\n- Unggah & simpan file\n- *Editor kode* bergaya Acode\n- `pratinjau` langsung\n\n1. Tulis kode\n2. Lihat pratinjau\n3. Simpan ke Dokumen',
+  plain:'Tulis teks apa saja di sini.\nBaris kedua untuk contoh.'
+};
+var ED_JS_HOOK='<scr'+'ipt>(function(){function send(l,a){try{parent.postMessage({__ed:1,level:l,text:a},"*")}catch(e){}}["log","info","warn","error"].forEach(function(k){var o=console[k]?console[k].bind(console):function(){};console[k]=function(){send(k,[].slice.call(arguments).map(function(x){try{return typeof x==="object"?JSON.stringify(x):String(x)}catch(e){return String(x)}}));o&&o.apply(null,arguments);};});window.onerror=function(m,s,n){send("error",[m+(n?" (baris "+n+")":"")]);};})();<\/scr'+'ipt>';
+var edDebHl=null,edDebDraft=null,edDebPrev=null,edPyodide=null,edPyLoading=false,edPyPromise=null;
+function edEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function edGetLang(){return $('#edLang').value;}
+function edLineNums(code){var n=code.split('\n').length,s='',i;for(i=1;i<=n;i++)s+=i+'\n';return s;}
+function edHighlight(code,langName){
+  var rules=ED_RULES[langName]||[];
+  if(!rules.length||code.length>150000)return edEsc(code);
+  var re=new RegExp(rules.map(function(r){return '('+r[1]+')';}).join('|'),'gm');
+  var out='',last=0,m,gi,i;
+  while((m=re.exec(code))){
+    if(m[0]===''){re.lastIndex++;continue;}
+    out+=edEsc(code.slice(last,m.index));
+    gi=-1;for(i=1;i<m.length;i++){if(m[i]!==undefined){gi=i-1;break;}}
+    out+='<span class="tok-'+rules[gi][0]+'">'+edEsc(m[0])+'</span>';
+    last=m.index+m[0].length;
+  }
+  return out+edEsc(code.slice(last));
+}
+function edHighlightNow(){
+  var code=$('#edText').value,t=I18N[lang];
+  $('#edHl').innerHTML=edHighlight(code,edGetLang())+'\n';
+  $('#edLines').textContent=edLineNums(code);
+  $('#edCount').textContent=code.split('\n').length+' '+t.edLines+' · '+code.length+' '+t.edChars;
+}
+function edSync(){
+  var l=edGetLang(),t=I18N[lang];
+  $('#edLangChip').textContent=ED_META[l];
+  $('#edRunText').textContent=(l==='js'||l==='python')?t.edRunJs:t.edRunPreview;
+  var plainOpt=document.querySelector('[data-ed-plain]');
+  if(plainOpt)plainOpt.textContent=t.edPlainOpt;
+  edHighlightNow();
+}
+function edSaveDraft(){
+  try{
+    localStorage.setItem('storageku_ed_draft',JSON.stringify({lang:edGetLang(),name:$('#edName').value,code:$('#edText').value,date:Date.now()}));
+    $('#edDraftInfo').innerHTML='<span class="okmark">✓</span> '+I18N[lang].edSavedAt(new Date().toLocaleTimeString(lang==='id'?'id-ID':'en-US',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){}
+}
+function edPreviewOpen(){return !$('#edPreviewPanel').hidden;}
+function edConsoleClear(){$('#edConsole').textContent='';}
+function edConsoleAppend(level,parts){
+  var con=$('#edConsole'),line=document.createElement('div');
+  line.className='c-'+level;line.textContent=parts.join(' ');
+  con.appendChild(line);con.scrollTop=con.scrollHeight;
+}
+function edWrapDoc(css,inner){return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,\'Segoe UI\',sans-serif;margin:0;padding:22px;background:#fff;color:#1c2333;line-height:1.55}'+(css||'')+'</style></head><body>'+inner+'</body></html>';}
+function edMdToHtml(src){
+  var lines=edEsc(src).split('\n'),out=[],inCode=false,listType=null;
+  function closeList(){if(listType){out.push(listType==='ul'?'</ul>':'</ol>');listType=null;}}
+  for(var i=0;i<lines.length;i++){
+    var L=lines[i];
+    if(/^```/.test(L)){closeList();inCode=!inCode;out.push(inCode?'<pre>':'</pre>');continue;}
+    if(inCode){out.push(L);continue;}
+    var h=L.match(/^#{1,6}\s+(.*)$/);
+    if(h){var lv=h[1].length;closeList();out.push('<h'+lv+'>'+h[2]+'</h'+lv+'>');continue;}
+    var ul=L.match(/^\s*[-*+]\s+(.*)$/),ol=L.match(/^\s*\d+\.\s+(.*)$/);
+    if(ul){if(listType!=='ul'){closeList();out.push('<ul>');listType='ul';}out.push('<li>'+ul[1]+'</li>');continue;}
+    if(ol){if(listType!=='ol'){closeList();out.push('<ol>');listType='ol';}out.push('<li>'+ol[1]+'</li>');continue;}
+    closeList();
+    if(!L.trim()){out.push('');continue;}
+    out.push('<p>'+L+'</p>');
+  }
+  closeList();
+  return out.join('\n')
+    .replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<em>$2</em>')
+    .replace(/`([^`\n]+)`/g,'<code>$1</code>')
+    .replace(/\[([^\]\n]+)\]\(([^)\n]+)\)/g,'<a href="$2">$1</a>');
+}
+function edMdCss(){return 'h1,h2,h3{color:#1a2b6d;border-bottom:2px solid #eef1f8;padding-bottom:5px}code{background:#f2f4f8;padding:2px 6px;border-radius:5px;font-family:ui-monospace,Consolas,monospace}pre{background:#f2f4f8;padding:12px;border-radius:8px;overflow:auto}a{color:#4285f4}';}
+function edRenderPreview(){
+  var l=edGetLang(),code=$('#edText').value,fr=$('#edFrame'),con=$('#edConsole'),t=I18N[lang];
+  $('#edPreviewPanel').hidden=false;
+  $('#edPrevLang').textContent=ED_META[l];
+  if(l==='html'){con.hidden=true;fr.hidden=false;fr.srcdoc=code;}
+  else if(l==='css'){
+    con.hidden=true;fr.hidden=false;
+    fr.srcdoc=edWrapDoc(code,'<h1>Judul Heading</h1><p>Paragraf contoh untuk menguji gaya, berisi <a href="#">tautan</a> dan <strong>teks tebal</strong>.</p><button>Tombol</button><ul><li>Item satu</li><li>Item dua</li><li>Item tiga</li></ul><div class="kartu box card container">div dengan class: kartu / box / card</div><input placeholder="Contoh input">');
+  }
+  else if(l==='md'){con.hidden=true;fr.hidden=false;fr.srcdoc=edWrapDoc(edMdCss(),edMdToHtml(code));}
+  else if(l==='json'){
+    con.hidden=true;fr.hidden=false;
+    try{fr.srcdoc=edWrapDoc('pre{white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:13px}','<pre>'+edEsc(JSON.stringify(JSON.parse(code),null,2))+'</pre>');}
+    catch(err){fr.srcdoc=edWrapDoc('.err{color:#c62828;background:#fdecea;border:1px solid #f5c6cb;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;white-space:pre-wrap}','<div class="err"><strong>JSON Error:</strong><br>'+edEsc(String(err.message))+'</div>');}
+  }
+  else if(l==='plain'){con.hidden=true;fr.hidden=false;fr.srcdoc=edWrapDoc('pre{white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:13px}','<pre>'+edEsc(code)+'</pre>');}
+  else if(l==='js'){edRunJs();}
+}
+function edRunJs(){
+  var fr=$('#edFrame');
+  $('#edPreviewPanel').hidden=false;$('#edPrevLang').textContent='JS';
+  edConsoleClear();$('#edConsole').hidden=false;fr.hidden=true;
+  fr.srcdoc=ED_JS_HOOK+'<scr'+'ipt>\n'+$('#edText').value+'\n<\/scr'+'ipt>';
+}
+function loadScriptOnce(src){
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');
+    s.src=src;s.onload=function(){res();};s.onerror=function(){rej(new Error('Gagal memuat '+src));};
+    document.head.appendChild(s);
+  });
+}
+function ensurePyodide(){
+  if(edPyodide)return Promise.resolve(edPyodide);
+  if(edPyPromise)return edPyPromise;
+  edPyLoading=true;
+  var BASE='https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+  edPyPromise=loadScriptOnce(BASE+'pyodide.js')
+    .then(function(){return loadPyodide({indexURL:BASE});})
+    .then(function(py){
+      edPyodide=py;edPyLoading=false;
+      py.setStdout({batched:function(s){edConsoleAppend('log',[s]);}});
+      py.setStderr({batched:function(s){edConsoleAppend('error',[s]);}});
+      return py;
+    })
+    .catch(function(e){edPyLoading=false;edPyPromise=null;throw e;});
+  return edPyPromise;
+}
+function edRunPython(){
+  var t=I18N[lang],code=$('#edText').value;
+  $('#edPreviewPanel').hidden=false;$('#edPrevLang').textContent='PY';
+  edConsoleClear();$('#edConsole').hidden=false;$('#edFrame').hidden=true;
+  edConsoleAppend('info',[t.edPyLoading]);
+  ensurePyodide().then(function(py){
+    edConsoleClear();
+    return py.loadPackagesFromImports(code,{messageCallback:function(){}}).catch(function(){})
+      .then(function(){return py.runPythonAsync(code);})
+      .then(function(v){if(v!==undefined&&v!==null)edConsoleAppend('log',[String(v)]);edConsoleAppend('ok',[t.edPyDone]);});
+  }).catch(function(err){
+    edConsoleClear();
+    edConsoleAppend('error',[edPyodide?((err&&err.message)?err.message:String(err)):t.edPyError]);
+  });
+}
+function edRunClick(){
+  if(!$('#edText').value.trim()){toast(I18N[lang].edEmptyCode,'warn');return;}
+  var l=edGetLang();
+  if(l==='python')edRunPython();
+  else if(l==='js')edRunJs();
+  else edRenderPreview();
+}
+function edFileName(){
+  var ext=ED_EXT_FROM_LANG[edGetLang()],name=$('#edName').value.trim();
+  if(!name)name='kode-'+new Date().toISOString().slice(0,10);
+  if(!new RegExp('\\.'+ext+'$','i').test(name))name+='.'+ext;
+  return name;
+}
+function edSaveDoc(){
+  var t=I18N[lang],code=$('#edText').value;
+  if(!code.trim()){toast(t.edEmptyCode,'warn');return;}
+  var name=edFileName();
+  var f=new File([code],name,{type:ED_MIME[edGetLang()]||'text/plain'});
+  makeThumb(f).then(function(th){
+    var rec={id:uid(),name:f.name,size:f.size,type:f.type||'',date:new Date().toISOString(),blob:f,thumb:th};
+    return idbPut(rec).then(function(){return refreshFiles();}).then(function(){toast(t.edSavedDoc(name),'ok');});
+  }).catch(function(e){console.error(e);toast(t.toastDbError,'err');});
+}
+function edDownloadCode(){
+  var code=$('#edText').value;
+  if(!code.trim()){toast(I18N[lang].edEmptyCode,'warn');return;}
+  var f=new File([code],edFileName(),{type:ED_MIME[edGetLang()]||'text/plain'});
+  downloadFile({name:f.name,blob:f});
+}
+function isTextFile(rec){
+  if(rec.thumb)return false;
+  var type=rec.type||'';
+  if(type.indexOf('image/')===0||type.indexOf('audio/')===0||type.indexOf('video/')===0||type==='application/pdf')return false;
+  return canPreview(rec);
+}
+function openInEditor(rec){
+  var t=I18N[lang];
+  readFileText(rec.blob,function(txt){
+    $('#edText').value=txt;
+    $('#edName').value=rec.name;
+    $('#edLang').value=ED_EXT_LANG[extOf(rec.name)]||'plain';
+    edSync();edSaveDraft();
+    document.getElementById('editorCard').scrollIntoView({behavior:'smooth'});
+    if(['html','css','md','json','plain'].indexOf(edGetLang())!==-1)edRenderPreview();
+    toast(t.edOpened,'ok');
+  },function(){toast(t.pvLoadError,'err');});
+}
+function initEditor(){
+  var ta=$('#edText');
+  ta.addEventListener('input',function(){
+    clearTimeout(edDebHl);edDebHl=setTimeout(edHighlightNow,120);
+    clearTimeout(edDebDraft);edDebDraft=setTimeout(edSaveDraft,800);
+    if($('#edAuto').checked&&edPreviewOpen()&&['html','css','md','json'].indexOf(edGetLang())!==-1){
+      clearTimeout(edDebPrev);edDebPrev=setTimeout(edRenderPreview,700);
+    }
+  });
+  ta.addEventListener('scroll',function(){
+    $('#edHl').scrollTop=ta.scrollTop;$('#edHl').scrollLeft=ta.scrollLeft;
+    $('#edLines').scrollTop=ta.scrollTop;
+  });
+  ta.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){
+      e.preventDefault();
+      ta.setRangeText('  ',ta.selectionStart,ta.selectionEnd,'end');
+      ta.dispatchEvent(new Event('input'));
+    }
+    if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')){e.preventDefault();edSaveDoc();}
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();edRunClick();}
+  });
+  $('#edLang').addEventListener('change',function(){edSync();edSaveDraft();if(edPreviewOpen()&&['html','css','md','json','plain'].indexOf(edGetLang())!==-1)edRenderPreview();});
+  $('#edRun').addEventListener('click',edRunClick);
+  $('#edRefresh').addEventListener('click',edRunClick);
+  $('#edPreviewClose').addEventListener('click',function(){$('#edPreviewPanel').hidden=true;});
+  $('#edSaveDoc').addEventListener('click',edSaveDoc);
+  $('#edDownload').addEventListener('click',edDownloadCode);
+  $('#edNew').addEventListener('click',function(){
+    var t=I18N[lang];
+    if($('#edText').value.trim()&&!confirm(t.edConfirmNew))return;
+    ta.value='';$('#edName').value='';edHighlightNow();edSaveDraft();
+  });
+  $('#edExample').addEventListener('click',function(){
+    var t=I18N[lang],l=edGetLang();
+    if(ta.value.trim()&&ta.value!==ED_EXAMPLES[l]&&!confirm(t.edConfirmNew))return;
+    ta.value=ED_EXAMPLES[l]||'';
+    if(!$('#edName').value.trim())$('#edName').value='contoh.'+ED_EXT_FROM_LANG[l];
+    edHighlightNow();edSaveDraft();
+    if(['html','css','md','json'].indexOf(l)!==-1)edRenderPreview();
+  });
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.__ed)edConsoleAppend(e.data.level,e.data.text);
+  });
+  try{
+    var d=JSON.parse(localStorage.getItem('storageku_ed_draft')||'null');
+    if(d&&typeof d.code==='string'&&ED_META[d.lang]){
+      ta.value=d.code;$('#edName').value=d.name||'';$('#edLang').value=d.lang;
+      $('#edDraftInfo').innerHTML='<span class="okmark">✓</span> '+I18N[lang].edSavedAt(new Date(d.date||Date.now()).toLocaleTimeString(lang==='id'?'id-ID':'en-US',{hour:'2-digit',minute:'2-digit'}));
+    }
+  }catch(e){}
+  edSync();
+}
+
+/* ================= STATISTIK ================= */
+function updateStats(){
+  var total=files.reduce(function(s,f){return s+(f.size||0);},0);
+  $('#statFiles').textContent=files.length;
+  $('#statSize').textContent=fmtSize(total);
+  $('#statNotes').textContent=notes.length;
+}
+function refreshFiles(){return idbAll().then(function(list){files=list;renderFiles();updateStats();});}
+
+/* ================= BAHASA ================= */
+function applyLang(){
+  document.documentElement.lang=lang;
+  var t=I18N[lang];
+  var els=document.querySelectorAll('[data-i18n]');
+  for(var i=0;i<els.length;i++){var k=els[i].getAttribute('data-i18n');if(t[k]!=null)els[i].textContent=t[k];}
+  var phs=document.querySelectorAll('[data-i18n-ph]');
+  for(var j=0;j<phs.length;j++){var k2=phs[j].getAttribute('data-i18n-ph');if(t[k2]!=null)phs[j].setAttribute('placeholder',t[k2]);}
+  $('#langToggle').textContent=lang==='id'?'🌐 EN':'🌐 ID';
+  renderFiles();renderNotes();edSync();
+}
+
+/* ================= EVENT ================= */
+var dz=$('#dropzone'),fileInput=$('#fileInput');
+['dragenter','dragover'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag');});});
+['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('drag');});});
+dz.addEventListener('drop',function(e){handleFiles(e.dataTransfer.files);});
+window.addEventListener('dragover',function(e){e.preventDefault();});
+window.addEventListener('drop',function(e){e.preventDefault();});
+dz.addEventListener('click',function(){fileInput.click();});
+dz.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fileInput.click();}});
+$('#browseBtn').addEventListener('click',function(e){e.stopPropagation();fileInput.click();});
+fileInput.addEventListener('change',function(e){handleFiles(e.target.files);e.target.value='';});
+
+$('#fileSearch').addEventListener('input',renderFiles);
+$('#noteSearch').addEventListener('input',renderNotes);
+$('#saveNote').addEventListener('click',saveNote);
+$('#noteText').addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter')saveNote();
+});
+
+$('#deleteAllFiles').addEventListener('click',function(){
+  var t=I18N[lang];
+  if(!files.length){toast(t.toastDeleted,'ok');return;}
+  if(confirm(t.confirmDelAllFiles)){idbClear().then(refreshFiles).then(function(){toast(t.toastDeleted,'ok');});}
+});
+$('#deleteAllNotes').addEventListener('click',function(){
+  var t=I18N[lang];
+  if(!notes.length){toast(t.toastDeleted,'ok');return;}
+  if(confirm(t.confirmDelAllNotes)){notes=[];if(persistNotes()){renderNotes();updateStats();toast(t.toastDeleted,'ok');}}
+});
+$('#langToggle').addEventListener('click',function(){
+  lang=lang==='id'?'en':'id';
+  try{localStorage.setItem(LANG_KEY,lang);}catch(e){}
+  applyLang();
+});
+
+/* ================= INISIALISASI ================= */
+loadNotes();
+applyLang();
+updateStats();
+initEditor();
+openDB().then(function(d){db=d;return refreshFiles();})
+  .catch(function(e){dbFailed=true;console.error(e);renderFiles();toast(I18N[lang].toastDbError,'err');});
+
+/* Akses kecil untuk pengujian otomatis (tidak memengaruhi tampilan) */
+window.__storageKu={handleFiles:handleFiles,refreshFiles:refreshFiles};
+})();
+</script>
+</body>
+</html>
