@@ -221,10 +221,80 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
   border-top-color:var(--blue);animation:pvSpin .8s linear infinite;position:relative;z-index:1}
 @keyframes pvSpin{to{transform:rotate(360deg)}}
 
+/* ---------- Editor Kode (gaya Acode) ---------- */
+.engine-chip.ed{color:#5fe3a5;background:rgba(61,214,140,.13);border:1px solid rgba(61,214,140,.4)}
+.ed-toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ed-name{font:inherit;color:var(--text);background:var(--inset);border:1px solid var(--line2);
+  border-radius:10px;padding:9px 12px;width:210px}
+.ed-name:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(66,133,244,.18)}
+.ed-toolbar select{font:inherit;font-weight:600;color:var(--text);background:var(--inset);
+  border:1px solid var(--line2);border-radius:10px;padding:9px 12px;cursor:pointer}
+.ed-toolbar select:focus{outline:none;border-color:var(--blue)}
+.ed-auto{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);user-select:none}
+.ed-auto input{accent-color:#4285f4;width:15px;height:15px;cursor:pointer}
+.ed-split{display:flex;gap:14px;align-items:stretch}
+.ed-main{flex:1.15;min-width:0}
+.ed-wrap{display:flex;height:400px;border:1px solid var(--line2);border-radius:12px;
+  overflow:hidden;background:#0a0c12}
+.ed-gutter{background:#0d1019;border-right:1px solid var(--line);width:46px;flex:none;
+  overflow:hidden;user-select:none}
+.ed-gutter pre{margin:0;padding:12px 9px 12px 0;text-align:right;color:#4a5470;white-space:pre}
+.ed-code{position:relative;flex:1;min-width:0}
+.ed-hl{position:absolute;inset:0;margin:0;padding:12px 14px;overflow:hidden;
+  white-space:pre;color:#c9d4f2;pointer-events:none}
+.ed-code textarea{position:absolute;inset:0;width:100%;height:100%;resize:none;border:0;
+  background:transparent;color:transparent;caret-color:#fff;padding:12px 14px;
+  white-space:pre;overflow:auto;outline:none}
+.ed-code textarea::placeholder{color:#5f6a8a}
+.ed-code textarea::selection{background:rgba(66,133,244,.35);color:transparent}
+.ed-code textarea,.ed-hl,.ed-gutter pre{font-family:ui-monospace,'Cascadia Mono',Consolas,'Courier New',monospace;
+  font-size:12.8px;line-height:1.6;tab-size:2}
+.ed-status{display:flex;gap:14px;align-items:center;margin-top:9px;font-size:11.5px;
+  color:var(--muted);flex-wrap:wrap}
+.ed-status .okmark{color:#5fe3a5}
+.tok-com{color:#5b6580;font-style:italic}
+.tok-str{color:#fbd75b}
+.tok-doc{color:#c58af9}
+.tok-tag{color:#7aa7ff}
+.tok-at{color:#c58af9}
+.tok-prop{color:#8ab4f8}
+.tok-num{color:#5fe3a5}
+.tok-key{color:#7aa7ff}
+.tok-lit{color:#c58af9}
+.tok-fn{color:#80deea}
+.tok-tstr{color:#5fe3a5}
+.tok-dec{color:#ffa94d}
+.tok-mkey{color:#8ab4f8;font-weight:600}
+.tok-code{color:#5fe3a5}
+.tok-h{color:#7aa7ff;font-weight:700}
+.tok-b{color:#fbd75b;font-weight:700}
+.tok-i{color:#c9d4f2;font-style:italic}
+.tok-link{color:#80deea;text-decoration:underline}
+.tok-li{color:#ffa94d}
+.ed-preview{flex:1;min-width:0;display:flex;flex-direction:column;
+  border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:#0a0c12}
+.ed-mini-head{display:flex;align-items:center;gap:9px;padding:9px 12px;
+  border-bottom:1px solid var(--line);background:rgba(10,12,19,.6);flex-wrap:wrap}
+.ed-mini-head strong{font-size:13px}
+.ed-ptools{margin-left:auto;display:flex;gap:8px}
+.ed-preview-body{position:relative;flex:1;min-height:340px}
+#edFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.ed-console{position:absolute;inset:0;margin:0;overflow:auto;padding:12px 14px;
+  font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word}
+.ed-console .c-log{color:#c9d4f2}
+.ed-console .c-info{color:#8ab4f8}
+.ed-console .c-warn{color:#fbd75b}
+.ed-console .c-error{color:#ff8a93}
+.ed-console .c-ok{color:#5fe3a5}
+
 @media(max-width:620px){
   .pv-backdrop{padding:10px}
   .pv-modal{height:92vh}
   .pv-actions{width:100%;margin-left:0}
+  .ed-split{flex-direction:column}
+  .ed-wrap{height:320px}
+  .ed-name{width:100%}
   .header-side{margin-left:0}
   input[type=search]{max-width:none}
   .tools input[type=search]{flex:1;width:auto;max-width:none}
@@ -339,6 +409,63 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
         <span id="noteEmptyText">Belum ada catatan.</span>
       </div>
     </section>
+  <!-- ================= EDITOR KODE (ACODE) ================= -->
+  <section class="card" id="editorCard">
+    <div class="section-head">
+      <h2><span class="engine-chip ed">ACODE</span><span data-i18n="edTitle">Editor Kode</span><span class="count" id="edLangChip">HTML</span></h2>
+    </div>
+    <p class="hint" data-i18n="edHint">Tulis kode seperti di Acode — pratinjau langsung di samping, simpan ke Dokumen, atau unduh. Draf tersimpan otomatis di browser.</p>
+    <div class="ed-toolbar">
+      <input id="edName" class="ed-name" data-i18n-ph="edNamePh" placeholder="nama-file">
+      <select id="edLang" aria-label="Bahasa pemrograman">
+        <option value="html">HTML</option>
+        <option value="css">CSS</option>
+        <option value="js">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="json">JSON</option>
+        <option value="md">Markdown</option>
+        <option value="plain" data-ed-plain>Teks</option>
+      </select>
+      <span class="ed-auto"><input type="checkbox" id="edAuto" checked><label for="edAuto" data-i18n="edAuto">Otomatis</label></span>
+      <div class="tools">
+        <button id="edNew" class="btn ghost small" data-i18n="edNew">Baru</button>
+        <button id="edExample" class="btn ghost small" data-i18n="edExample">Contoh</button>
+        <button id="edSaveDoc" class="btn ghost small" data-i18n="edSaveDoc">Simpan ke Dokumen</button>
+        <button id="edDownload" class="btn ghost small"><span data-i18n="btnDownload">Unduh</span></button>
+        <button id="edRun" class="btn primary small">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <span id="edRunText">Pratinjau</span>
+        </button>
+      </div>
+    </div>
+    <div class="ed-split">
+      <div class="ed-main">
+        <div class="ed-wrap">
+          <div class="ed-gutter"><pre id="edLines">1</pre></div>
+          <div class="ed-code">
+            <pre id="edHl" class="ed-hl" aria-hidden="true"></pre>
+            <textarea id="edText" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" data-i18n-ph="edPlaceholder" placeholder="Tulis kode Anda di sini…"></textarea>
+          </div>
+        </div>
+        <div class="ed-status"><span id="edCount">0 baris · 0 karakter</span><span id="edDraftInfo"></span></div>
+      </div>
+      <div class="ed-preview" id="edPreviewPanel" hidden>
+        <div class="ed-mini-head">
+          <strong data-i18n="edPreviewTitle">Pratinjau</strong>
+          <span class="mini-chip idb" id="edPrevLang">HTML</span>
+          <div class="ed-ptools">
+            <button id="edRefresh" class="btn ghost small" data-i18n="edRefresh">Segarkan</button>
+            <button id="edPreviewClose" class="btn danger small" data-i18n="pvClose">Tutup</button>
+          </div>
+        </div>
+        <div class="ed-preview-body">
+          <iframe id="edFrame" sandbox="allow-scripts allow-modals allow-forms" title="Pratinjau kode"></iframe>
+          <pre id="edConsole" class="ed-console" hidden></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
   </main>
 
   <!-- ================= FOOTER ================= -->
@@ -350,7 +477,7 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
         <span class="badge"><span class="dot" style="background:#ff1b2d"></span>Opera <span class="ok">✓</span></span>
       </div>
       <p class="muted small" data-i18n="footerText">Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ &amp; Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ &amp; Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser &amp; profil yang dipakai, dan tidak pernah dikirim ke server mana pun.</p>
-      <p class="muted small" style="margin-top:9px;opacity:.75">v1.1 · pratinjau file dalam modal futuristik / futuristic in-browser file preview</p>
+      <p class="muted small" style="margin-top:9px;opacity:.75">v1.2 · pratinjau futuristik + editor kode gaya Acode / futuristic preview + Acode-style code editor</p>
     </div>
   </footer>
 </div>
@@ -400,7 +527,7 @@ id:{
   uploadTitle:'Unggah Dokumen & Data',
   uploadHint:'File disimpan utuh ke IndexedDB — basis data bawaan Chrome & Opera. Tidak ada yang dikirim ke internet.',
   dzMain:'Tarik & letakkan file di sini', dzOr:'atau', btnBrowse:'Pilih File',
-  dzTypes:'Format utama: PDF · DOCX · XLSX · CSV · JSON · TXT · PPTX · ZIP — gambar juga didukung',
+  dzTypes:'Format utama: PDF · DOCX · XLSX · CSV · JSON · HTML · CSS · JS · PY · ZIP — banyak lagi; gambar juga didukung',
   filesTitle:'Dokumen Tersimpan', searchPhFiles:'Cari dokumen…', btnDelAll:'Hapus Semua',
   emptyFiles:'Belum ada dokumen — unggah file pertama Anda lewat area unggah di atas.',
   emptyFilesSearch:'Tidak ada dokumen yang cocok dengan pencarian.',
@@ -416,6 +543,21 @@ id:{
   pvLoadError:'Gagal membaca isi file untuk pratinjau.',
   pvCsvTrunc:function(n){return 'Menampilkan 300 baris pertama — '+n+' baris lainnya tidak ditampilkan.';},
   pvTxtTrunc:'Menampilkan 200.000 karakter pertama.',
+  edTitle:'Editor Kode',
+  edHint:'Tulis kode seperti di Acode — pratinjau langsung di samping, simpan ke Dokumen, atau unduh. Draf tersimpan otomatis di browser.',
+  edAuto:'Otomatis', edNew:'Baru', edExample:'Contoh', edSaveDoc:'Simpan ke Dokumen',
+  edRunPreview:'Pratinjau', edRunJs:'Jalankan', edPreviewTitle:'Pratinjau', edRefresh:'Segarkan',
+  edPlainOpt:'Teks', edNamePh:'nama-file', edPlaceholder:'Tulis kode Anda di sini…',
+  edEmptyCode:'Editor masih kosong — tulis kode dulu atau muat Contoh.',
+  edConfirmNew:'Ganti isi editor? Isi saat ini akan terganti.',
+  edSavedAt:function(s){return 'Draf tersimpan otomatis · '+s;},
+  edSavedDoc:function(n){return 'Kode tersimpan sebagai "'+n+'" di Dokumen.';},
+  edOpened:'Dibuka di Editor Kode.',
+  edLines:'baris', edChars:'karakter',
+  edPyLoading:'Memuat mesin Python (Pyodide ±10 MB — butuh internet)…',
+  edPyDone:'Selesai — program berjalan tanpa error.',
+  edPyError:'Mesin Python tidak dapat dimuat — periksa koneksi internet lalu coba lagi.',
+  btnEdit:'Edit',
   footerTitle:'Kompatibilitas Browser',
   footerText:'Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ & Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ & Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser & profil yang dipakai, dan tidak pernah dikirim ke server mana pun.',
   confirmDelFile:function(n){return 'Hapus file "'+n+'"?';},
@@ -437,7 +579,7 @@ en:{
   uploadTitle:'Upload Documents & Data',
   uploadHint:'Files are stored intact into IndexedDB — the built-in database of Chrome & Opera. Nothing is sent to the internet.',
   dzMain:'Drag & drop your files here', dzOr:'or', btnBrowse:'Browse Files',
-  dzTypes:'Main formats: PDF · DOCX · XLSX · CSV · JSON · TXT · PPTX · ZIP — images are supported too',
+  dzTypes:'Main formats: PDF · DOCX · XLSX · CSV · JSON · HTML · CSS · JS · PY · ZIP — and many more; images are supported too',
   filesTitle:'Stored Documents', searchPhFiles:'Search documents…', btnDelAll:'Delete All',
   emptyFiles:'No documents yet — upload your first file using the drop zone above.',
   emptyFilesSearch:'No documents match your search.',
@@ -453,6 +595,21 @@ en:{
   pvLoadError:'Failed to read the file contents for preview.',
   pvCsvTrunc:function(n){return 'Showing the first 300 rows — '+n+' more rows are hidden.';},
   pvTxtTrunc:'Showing the first 200,000 characters.',
+  edTitle:'Code Editor',
+  edHint:'Write code Acode-style — live preview on the side, save to Documents, or download. Drafts auto-save in your browser.',
+  edAuto:'Auto', edNew:'New', edExample:'Example', edSaveDoc:'Save to Documents',
+  edRunPreview:'Preview', edRunJs:'Run', edPreviewTitle:'Preview', edRefresh:'Refresh',
+  edPlainOpt:'Plain', edNamePh:'file-name', edPlaceholder:'Write your code here…',
+  edEmptyCode:'The editor is empty — write some code or load the Example.',
+  edConfirmNew:'Replace the editor content? The current content will be lost.',
+  edSavedAt:function(s){return 'Draft auto-saved · '+s;},
+  edSavedDoc:function(n){return 'Code saved as "'+n+'" in Documents.';},
+  edOpened:'Opened in Code Editor.',
+  edLines:'lines', edChars:'chars',
+  edPyLoading:'Loading the Python engine (Pyodide ±10 MB — internet required)…',
+  edPyDone:'Done — the program ran without errors.',
+  edPyError:'The Python engine could not be loaded — check your internet connection and try again.',
+  btnEdit:'Edit',
   footerTitle:'Browser Compatibility',
   footerText:'Built with standard web APIs and optimized for Google Chrome and Opera (both Chromium-based). localStorage has been available since Chrome 4+ & Opera 10.5+, and IndexedDB since Chrome 24+ & Opera 15+. All data stays local on your device, bound to the browser profile you use — it is never sent to any server.',
   confirmDelFile:function(n){return 'Delete file "'+n+'"?';},
@@ -492,7 +649,12 @@ var EXT_MAP={pdf:['PDF','#ff5370'],doc:['DOC','#5b9bff'],docx:['DOCX','#5b9bff']
   zip:['ZIP','#c58af9'],rar:['RAR','#c58af9'],'7z':['7Z','#c58af9'],
   html:['HTML','#ff8a80'],css:['CSS','#80deea'],js:['JS','#ffe082'],
   mp3:['MP3','#f06292'],wav:['WAV','#f06292'],mp4:['MP4','#7986cb'],mov:['MOV','#7986cb'],
-  png:['PNG','#c58af9'],jpg:['JPG','#c58af9'],jpeg:['JPG','#c58af9'],gif:['GIF','#c58af9'],webp:['WEBP','#c58af9'],svg:['SVG','#c58af9']};
+  png:['PNG','#c58af9'],jpg:['JPG','#c58af9'],jpeg:['JPG','#c58af9'],gif:['GIF','#c58af9'],webp:['WEBP','#c58af9'],svg:['SVG','#c58af9'],
+  py:['PY','#3776ab'],ts:['TS','#3178c6'],java:['JAVA','#e76f00'],c:['C','#9fb6cd'],cpp:['C++','#f34b7d'],
+  cs:['C#','#178600'],go:['GO','#00add8'],rs:['RS','#dea584'],rb:['RB','#cc342d'],php:['PHP','#777bb4'],
+  swift:['SWIFT','#f05138'],kt:['KT','#a97bff'],dart:['DART','#00b4ab'],lua:['LUA','#4f6db3'],
+  sh:['SH','#89e051'],bat:['BAT','#89e051'],ps1:['PS1','#5391fe'],yml:['YML','#fbd75b'],yaml:['YAML','#fbd75b'],
+  ipynb:['IPYNB','#f37726'],vue:['VUE','#42b883'],toml:['TOML','#fbd75b'],env:['ENV','#89e051']};
 function badgeFor(rec){
   if(rec.thumb)return null;
   var e=extOf(rec.name);
@@ -505,7 +667,8 @@ function badgeFor(rec){
 var ICONS={
   download:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
   trash:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>',
-  eye:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>'
+  eye:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>'
 };
 
 /* ================= TOAST ================= */
@@ -579,7 +742,8 @@ function downloadFile(rec){
 }
 /* ================= PRATINJAU FILE (modal futuristik) ================= */
 var pvState={rec:null,url:null};
-var TEXT_EXT={txt:1,md:1,json:1,csv:1,tsv:1,xml:1,sql:1,log:1,html:1,htm:1,css:1,js:1,mjs:1,yml:1,yaml:1,ini:1,conf:1};
+var TEXT_EXT={txt:1,md:1,json:1,csv:1,tsv:1,xml:1,sql:1,log:1,html:1,htm:1,css:1,js:1,mjs:1,yml:1,yaml:1,ini:1,conf:1,
+  py:1,ts:1,java:1,c:1,cpp:1,cs:1,go:1,rs:1,rb:1,php:1,swift:1,kt:1,dart:1,lua:1,sh:1,bat:1,ps1:1,toml:1,env:1};
 function canPreview(rec){
   var type=rec.type||'',e=extOf(rec.name);
   if(rec.thumb)return true;
@@ -753,6 +917,7 @@ function renderFiles(){
     }
     act.appendChild(mkBtn('ghost',ICONS.download,t.btnDownload,function(){downloadFile(rec);}));
     if(canPreview(rec))act.appendChild(mkBtn('ghost',ICONS.eye,t.btnView,function(){openPreview(rec);}));
+    if(isTextFile(rec))act.appendChild(mkBtn('ghost',ICONS.edit,t.btnEdit,function(){openInEditor(rec);}));
     act.appendChild(mkBtn('danger',ICONS.trash,t.btnDelete,function(){
       if(confirm(t.confirmDelFile(rec.name))){
         idbDelete(rec.id).then(refreshFiles).then(function(){toast(t.toastDeleted,'ok');});
@@ -811,6 +976,263 @@ function saveNote(){
   }
 }
 
+/* ================= EDITOR KODE (gaya Acode) ================= */
+var ED_EXT_LANG={html:'html',htm:'html',css:'css',js:'js',mjs:'js',py:'python',json:'json',md:'md',markdown:'md'};
+var ED_MIME={html:'text/html',css:'text/css',js:'text/javascript',python:'text/x-python',json:'application/json',md:'text/markdown',plain:'text/plain'};
+var ED_EXT_FROM_LANG={html:'html',css:'css',js:'js',python:'py',json:'json',md:'md',plain:'txt'};
+var ED_META={html:'HTML',css:'CSS',js:'JS',python:'PY',json:'JSON',md:'MD',plain:'TXT'};
+var ED_RULES={
+  html:[['com','<!--[\\s\\S]*?-->'],['doc','<![Dd][Oo][Cc][Tt][Yy][Pp][Ee][^>]*>'],['tag','</?[a-zA-Z][\\w-]*'],['str','"[^"\\n]*"|\'[^\'\\n]*\'']],
+  css:[['com','/\\*[\\s\\S]*?\\*/'],['str','"[^"\\n]*"|\'[^\'\\n]*\''],['at','@[\\w-]+'],['prop','[a-zA-Z-]+(?=\\s*:)'],['num','#[0-9a-fA-F]{3,8}\\b|\\b\\d+(?:\\.\\d+)?(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\\b']],
+  js:[['com','//[^\\n]*|/\\*[\\s\\S]*?\\*/'],['str','"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\'|`(?:\\\\.|[^`\\\\])*`'],['key','\\b(?:var|let|const|function|return|if|else|for|while|do|class|new|import|export|from|as|async|await|try|catch|finally|throw|switch|case|break|continue|typeof|instanceof|this|super|extends|yield|delete|void|in|of|default)\\b'],['lit','\\b(?:true|false|null|undefined|NaN|Infinity)\\b'],['num','\\b0[xX][0-9a-fA-F]+\\b|\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b'],['fn','[a-zA-Z_$][\\w$]*(?=\\s*\\()']],
+  python:[['com','#[^\\n]*'],['tstr','"""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\''],['str','"(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\''],['key','\\b(?:def|return|if|elif|else|for|while|import|from|as|class|try|except|finally|with|lambda|yield|pass|break|continue|global|nonlocal|assert|raise|in|is|not|and|or|del|async|await|match|case)\\b'],['lit','\\b(?:None|True|False)\\b'],['dec','@[\\w.]+'],['num','\\b\\d+(?:\\.\\d+)?\\b'],['fn','[a-zA-Z_]\\w*(?=\\s*\\()']],
+  json:[['mkey','"(?:\\\\.|[^"\\\\])*"(?=\\s*:)'],['str','"(?:\\\\.|[^"\\\\])*"'],['lit','\\b(?:true|false|null)\\b'],['num','-?\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b']],
+  md:[['code','^`{3,}[\\s\\S]*?`{3,}'],['h','^#{1,6}[^\\n]*'],['b','\\*\\*[^*\\n]+\\*\\*|__[^_\\n]+__'],['i','(?<![\\w*])\\*[^*\\n]+\\*(?![\\w*])'],['link','\\[[^\\]\\n]*\\]\\([^)\\n]*\\)'],['li','^\\s*(?:[-*+]|\\d+\\.)\\s']],
+  plain:[]
+};
+var ED_EXAMPLES={
+  html:'<!DOCTYPE html>\n<html lang="id">\n<head>\n  <meta charset="UTF-8">\n  <title>Halo StorageKu</title>\n  <style>\n    body{font-family:system-ui,sans-serif;padding:28px;background:#f4f6fb}\n    .kartu{background:#fff;border-radius:14px;padding:20px;max-width:420px;box-shadow:0 8px 24px rgba(20,30,80,.12)}\n    button{background:#4285f4;color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}\n  </style>\n</head>\n<body>\n  <div class="kartu">\n    <h1>Halo, dunia! 👋</h1>\n    <p>Ini pratinjau langsung dari Editor Kode StorageKu.</p>\n    <button onclick="sapa()">Klik saya</button>\n  </div>\n  <script>\n    function sapa(){\n      console.log(\'Tombol diklik!\');\n      alert(\'Halo dari StorageKu!\');\n    }\n  <\/script>\n</body>\n</html>',
+  css:'/* Contoh CSS — pratinjau memakai halaman demo */\nbody{background:linear-gradient(135deg,#eef4ff,#fdf0f2)}\n.kartu{background:#fff;border-radius:16px;padding:24px;border:1px solid #e3e9f7;\n  box-shadow:0 12px 30px rgba(30,40,90,.15)}\nh1{color:#4285f4;font-family:system-ui}\nbutton{background:linear-gradient(135deg,#4285f4,#ff1b2d);color:#fff;border:0;\n  padding:10px 18px;border-radius:10px;font-size:15px}',
+  js:'// Contoh JavaScript — hasil muncul di panel Keluaran\nconst nama = "StorageKu";\nlet total = 0;\nfor (let i = 1; i <= 5; i++) {\n  total += i;\n}\nconsole.log("Selamat datang di", nama);\nconsole.log("Jumlah 1..5 =", total);\nconsole.warn("Ini contoh peringatan");\nconsole.error("Ini contoh error (tidak berbahaya)");',
+  python:'# Contoh Python — dijalankan dengan Pyodide (WebAssembly)\nimport math\n\ndef luas_lingkaran(r):\n    return math.pi * r ** 2\n\nfor r in (1, 2.5, 4):\n    print(f"Luas lingkaran r={r}: {luas_lingkaran(r):.2f}")\n\nprint("Nama:", "StorageKu")',
+  json:'{\n  "aplikasi": "StorageKu",\n  "versi": "1.2",\n  "fitur": ["unggah file", "editor kode", "pratinjau langsung"],\n  "aktif": true,\n  "pengguna": {"nama": "Anda", "tahap": "mencoba"}\n}',
+  md:'# Halo StorageKu 👋\n\nIni **Markdown** — pratinjau langsung saat Anda mengetik.\n\n## Daftar fitur\n- Unggah & simpan file\n- *Editor kode* bergaya Acode\n- `pratinjau` langsung\n\n1. Tulis kode\n2. Lihat pratinjau\n3. Simpan ke Dokumen',
+  plain:'Tulis teks apa saja di sini.\nBaris kedua untuk contoh.'
+};
+var ED_JS_HOOK='<scr'+'ipt>(function(){function send(l,a){try{parent.postMessage({__ed:1,level:l,text:a},"*")}catch(e){}}["log","info","warn","error"].forEach(function(k){var o=console[k]?console[k].bind(console):function(){};console[k]=function(){send(k,[].slice.call(arguments).map(function(x){try{return typeof x==="object"?JSON.stringify(x):String(x)}catch(e){return String(x)}}));o&&o.apply(null,arguments);};});window.onerror=function(m,s,n){send("error",[m+(n?" (baris "+n+")":"")]);};})();<\/scr'+'ipt>';
+var edDebHl=null,edDebDraft=null,edDebPrev=null,edPyodide=null,edPyLoading=false,edPyPromise=null;
+function edEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function edGetLang(){return $('#edLang').value;}
+function edLineNums(code){var n=code.split('\n').length,s='',i;for(i=1;i<=n;i++)s+=i+'\n';return s;}
+function edHighlight(code,langName){
+  var rules=ED_RULES[langName]||[];
+  if(!rules.length||code.length>150000)return edEsc(code);
+  var re=new RegExp(rules.map(function(r){return '('+r[1]+')';}).join('|'),'gm');
+  var out='',last=0,m,gi,i;
+  while((m=re.exec(code))){
+    if(m[0]===''){re.lastIndex++;continue;}
+    out+=edEsc(code.slice(last,m.index));
+    gi=-1;for(i=1;i<m.length;i++){if(m[i]!==undefined){gi=i-1;break;}}
+    out+='<span class="tok-'+rules[gi][0]+'">'+edEsc(m[0])+'</span>';
+    last=m.index+m[0].length;
+  }
+  return out+edEsc(code.slice(last));
+}
+function edHighlightNow(){
+  var code=$('#edText').value,t=I18N[lang];
+  $('#edHl').innerHTML=edHighlight(code,edGetLang())+'\n';
+  $('#edLines').textContent=edLineNums(code);
+  $('#edCount').textContent=code.split('\n').length+' '+t.edLines+' · '+code.length+' '+t.edChars;
+}
+function edSync(){
+  var l=edGetLang(),t=I18N[lang];
+  $('#edLangChip').textContent=ED_META[l];
+  $('#edRunText').textContent=(l==='js'||l==='python')?t.edRunJs:t.edRunPreview;
+  var plainOpt=document.querySelector('[data-ed-plain]');
+  if(plainOpt)plainOpt.textContent=t.edPlainOpt;
+  edHighlightNow();
+}
+function edSaveDraft(){
+  try{
+    localStorage.setItem('storageku_ed_draft',JSON.stringify({lang:edGetLang(),name:$('#edName').value,code:$('#edText').value,date:Date.now()}));
+    $('#edDraftInfo').innerHTML='<span class="okmark">✓</span> '+I18N[lang].edSavedAt(new Date().toLocaleTimeString(lang==='id'?'id-ID':'en-US',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){}
+}
+function edPreviewOpen(){return !$('#edPreviewPanel').hidden;}
+function edConsoleClear(){$('#edConsole').textContent='';}
+function edConsoleAppend(level,parts){
+  var con=$('#edConsole'),line=document.createElement('div');
+  line.className='c-'+level;line.textContent=parts.join(' ');
+  con.appendChild(line);con.scrollTop=con.scrollHeight;
+}
+function edWrapDoc(css,inner){return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,\'Segoe UI\',sans-serif;margin:0;padding:22px;background:#fff;color:#1c2333;line-height:1.55}'+(css||'')+'</style></head><body>'+inner+'</body></html>';}
+function edMdToHtml(src){
+  var lines=edEsc(src).split('\n'),out=[],inCode=false,listType=null;
+  function closeList(){if(listType){out.push(listType==='ul'?'</ul>':'</ol>');listType=null;}}
+  for(var i=0;i<lines.length;i++){
+    var L=lines[i];
+    if(/^```/.test(L)){closeList();inCode=!inCode;out.push(inCode?'<pre>':'</pre>');continue;}
+    if(inCode){out.push(L);continue;}
+    var h=L.match(/^#{1,6}\s+(.*)$/);
+    if(h){var lv=h[1].length;closeList();out.push('<h'+lv+'>'+h[2]+'</h'+lv+'>');continue;}
+    var ul=L.match(/^\s*[-*+]\s+(.*)$/),ol=L.match(/^\s*\d+\.\s+(.*)$/);
+    if(ul){if(listType!=='ul'){closeList();out.push('<ul>');listType='ul';}out.push('<li>'+ul[1]+'</li>');continue;}
+    if(ol){if(listType!=='ol'){closeList();out.push('<ol>');listType='ol';}out.push('<li>'+ol[1]+'</li>');continue;}
+    closeList();
+    if(!L.trim()){out.push('');continue;}
+    out.push('<p>'+L+'</p>');
+  }
+  closeList();
+  return out.join('\n')
+    .replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<em>$2</em>')
+    .replace(/`([^`\n]+)`/g,'<code>$1</code>')
+    .replace(/\[([^\]\n]+)\]\(([^)\n]+)\)/g,'<a href="$2">$1</a>');
+}
+function edMdCss(){return 'h1,h2,h3{color:#1a2b6d;border-bottom:2px solid #eef1f8;padding-bottom:5px}code{background:#f2f4f8;padding:2px 6px;border-radius:5px;font-family:ui-monospace,Consolas,monospace}pre{background:#f2f4f8;padding:12px;border-radius:8px;overflow:auto}a{color:#4285f4}';}
+function edRenderPreview(){
+  var l=edGetLang(),code=$('#edText').value,fr=$('#edFrame'),con=$('#edConsole'),t=I18N[lang];
+  $('#edPreviewPanel').hidden=false;
+  $('#edPrevLang').textContent=ED_META[l];
+  if(l==='html'){con.hidden=true;fr.hidden=false;fr.srcdoc=code;}
+  else if(l==='css'){
+    con.hidden=true;fr.hidden=false;
+    fr.srcdoc=edWrapDoc(code,'<h1>Judul Heading</h1><p>Paragraf contoh untuk menguji gaya, berisi <a href="#">tautan</a> dan <strong>teks tebal</strong>.</p><button>Tombol</button><ul><li>Item satu</li><li>Item dua</li><li>Item tiga</li></ul><div class="kartu box card container">div dengan class: kartu / box / card</div><input placeholder="Contoh input">');
+  }
+  else if(l==='md'){con.hidden=true;fr.hidden=false;fr.srcdoc=edWrapDoc(edMdCss(),edMdToHtml(code));}
+  else if(l==='json'){
+    con.hidden=true;fr.hidden=false;
+    try{fr.srcdoc=edWrapDoc('pre{white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:13px}','<pre>'+edEsc(JSON.stringify(JSON.parse(code),null,2))+'</pre>');}
+    catch(err){fr.srcdoc=edWrapDoc('.err{color:#c62828;background:#fdecea;border:1px solid #f5c6cb;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;white-space:pre-wrap}','<div class="err"><strong>JSON Error:</strong><br>'+edEsc(String(err.message))+'</div>');}
+  }
+  else if(l==='plain'){con.hidden=true;fr.hidden=false;fr.srcdoc=edWrapDoc('pre{white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace;font-size:13px}','<pre>'+edEsc(code)+'</pre>');}
+  else if(l==='js'){edRunJs();}
+}
+function edRunJs(){
+  var fr=$('#edFrame');
+  $('#edPreviewPanel').hidden=false;$('#edPrevLang').textContent='JS';
+  edConsoleClear();$('#edConsole').hidden=false;fr.hidden=true;
+  fr.srcdoc=ED_JS_HOOK+'<scr'+'ipt>\n'+$('#edText').value+'\n<\/scr'+'ipt>';
+}
+function loadScriptOnce(src){
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');
+    s.src=src;s.onload=function(){res();};s.onerror=function(){rej(new Error('Gagal memuat '+src));};
+    document.head.appendChild(s);
+  });
+}
+function ensurePyodide(){
+  if(edPyodide)return Promise.resolve(edPyodide);
+  if(edPyPromise)return edPyPromise;
+  edPyLoading=true;
+  var BASE='https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+  edPyPromise=loadScriptOnce(BASE+'pyodide.js')
+    .then(function(){return loadPyodide({indexURL:BASE});})
+    .then(function(py){
+      edPyodide=py;edPyLoading=false;
+      py.setStdout({batched:function(s){edConsoleAppend('log',[s]);}});
+      py.setStderr({batched:function(s){edConsoleAppend('error',[s]);}});
+      return py;
+    })
+    .catch(function(e){edPyLoading=false;edPyPromise=null;throw e;});
+  return edPyPromise;
+}
+function edRunPython(){
+  var t=I18N[lang],code=$('#edText').value;
+  $('#edPreviewPanel').hidden=false;$('#edPrevLang').textContent='PY';
+  edConsoleClear();$('#edConsole').hidden=false;$('#edFrame').hidden=true;
+  edConsoleAppend('info',[t.edPyLoading]);
+  ensurePyodide().then(function(py){
+    edConsoleClear();
+    return py.loadPackagesFromImports(code,{messageCallback:function(){}}).catch(function(){})
+      .then(function(){return py.runPythonAsync(code);})
+      .then(function(v){if(v!==undefined&&v!==null)edConsoleAppend('log',[String(v)]);edConsoleAppend('ok',[t.edPyDone]);});
+  }).catch(function(err){
+    edConsoleClear();
+    edConsoleAppend('error',[edPyodide?((err&&err.message)?err.message:String(err)):t.edPyError]);
+  });
+}
+function edRunClick(){
+  if(!$('#edText').value.trim()){toast(I18N[lang].edEmptyCode,'warn');return;}
+  var l=edGetLang();
+  if(l==='python')edRunPython();
+  else if(l==='js')edRunJs();
+  else edRenderPreview();
+}
+function edFileName(){
+  var ext=ED_EXT_FROM_LANG[edGetLang()],name=$('#edName').value.trim();
+  if(!name)name='kode-'+new Date().toISOString().slice(0,10);
+  if(!new RegExp('\\.'+ext+'$','i').test(name))name+='.'+ext;
+  return name;
+}
+function edSaveDoc(){
+  var t=I18N[lang],code=$('#edText').value;
+  if(!code.trim()){toast(t.edEmptyCode,'warn');return;}
+  var name=edFileName();
+  var f=new File([code],name,{type:ED_MIME[edGetLang()]||'text/plain'});
+  makeThumb(f).then(function(th){
+    var rec={id:uid(),name:f.name,size:f.size,type:f.type||'',date:new Date().toISOString(),blob:f,thumb:th};
+    return idbPut(rec).then(function(){return refreshFiles();}).then(function(){toast(t.edSavedDoc(name),'ok');});
+  }).catch(function(e){console.error(e);toast(t.toastDbError,'err');});
+}
+function edDownloadCode(){
+  var code=$('#edText').value;
+  if(!code.trim()){toast(I18N[lang].edEmptyCode,'warn');return;}
+  var f=new File([code],edFileName(),{type:ED_MIME[edGetLang()]||'text/plain'});
+  downloadFile({name:f.name,blob:f});
+}
+function isTextFile(rec){
+  if(rec.thumb)return false;
+  var type=rec.type||'';
+  if(type.indexOf('image/')===0||type.indexOf('audio/')===0||type.indexOf('video/')===0||type==='application/pdf')return false;
+  return canPreview(rec);
+}
+function openInEditor(rec){
+  var t=I18N[lang];
+  readFileText(rec.blob,function(txt){
+    $('#edText').value=txt;
+    $('#edName').value=rec.name;
+    $('#edLang').value=ED_EXT_LANG[extOf(rec.name)]||'plain';
+    edSync();edSaveDraft();
+    document.getElementById('editorCard').scrollIntoView({behavior:'smooth'});
+    if(['html','css','md','json','plain'].indexOf(edGetLang())!==-1)edRenderPreview();
+    toast(t.edOpened,'ok');
+  },function(){toast(t.pvLoadError,'err');});
+}
+function initEditor(){
+  var ta=$('#edText');
+  ta.addEventListener('input',function(){
+    clearTimeout(edDebHl);edDebHl=setTimeout(edHighlightNow,120);
+    clearTimeout(edDebDraft);edDebDraft=setTimeout(edSaveDraft,800);
+    if($('#edAuto').checked&&edPreviewOpen()&&['html','css','md','json'].indexOf(edGetLang())!==-1){
+      clearTimeout(edDebPrev);edDebPrev=setTimeout(edRenderPreview,700);
+    }
+  });
+  ta.addEventListener('scroll',function(){
+    $('#edHl').scrollTop=ta.scrollTop;$('#edHl').scrollLeft=ta.scrollLeft;
+    $('#edLines').scrollTop=ta.scrollTop;
+  });
+  ta.addEventListener('keydown',function(e){
+    if(e.key==='Tab'){
+      e.preventDefault();
+      ta.setRangeText('  ',ta.selectionStart,ta.selectionEnd,'end');
+      ta.dispatchEvent(new Event('input'));
+    }
+    if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')){e.preventDefault();edSaveDoc();}
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();edRunClick();}
+  });
+  $('#edLang').addEventListener('change',function(){edSync();edSaveDraft();if(edPreviewOpen()&&['html','css','md','json','plain'].indexOf(edGetLang())!==-1)edRenderPreview();});
+  $('#edRun').addEventListener('click',edRunClick);
+  $('#edRefresh').addEventListener('click',edRunClick);
+  $('#edPreviewClose').addEventListener('click',function(){$('#edPreviewPanel').hidden=true;});
+  $('#edSaveDoc').addEventListener('click',edSaveDoc);
+  $('#edDownload').addEventListener('click',edDownloadCode);
+  $('#edNew').addEventListener('click',function(){
+    var t=I18N[lang];
+    if($('#edText').value.trim()&&!confirm(t.edConfirmNew))return;
+    ta.value='';$('#edName').value='';edHighlightNow();edSaveDraft();
+  });
+  $('#edExample').addEventListener('click',function(){
+    var t=I18N[lang],l=edGetLang();
+    if(ta.value.trim()&&ta.value!==ED_EXAMPLES[l]&&!confirm(t.edConfirmNew))return;
+    ta.value=ED_EXAMPLES[l]||'';
+    if(!$('#edName').value.trim())$('#edName').value='contoh.'+ED_EXT_FROM_LANG[l];
+    edHighlightNow();edSaveDraft();
+    if(['html','css','md','json'].indexOf(l)!==-1)edRenderPreview();
+  });
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.__ed)edConsoleAppend(e.data.level,e.data.text);
+  });
+  try{
+    var d=JSON.parse(localStorage.getItem('storageku_ed_draft')||'null');
+    if(d&&typeof d.code==='string'&&ED_META[d.lang]){
+      ta.value=d.code;$('#edName').value=d.name||'';$('#edLang').value=d.lang;
+      $('#edDraftInfo').innerHTML='<span class="okmark">✓</span> '+I18N[lang].edSavedAt(new Date(d.date||Date.now()).toLocaleTimeString(lang==='id'?'id-ID':'en-US',{hour:'2-digit',minute:'2-digit'}));
+    }
+  }catch(e){}
+  edSync();
+}
+
 /* ================= STATISTIK ================= */
 function updateStats(){
   var total=files.reduce(function(s,f){return s+(f.size||0);},0);
@@ -829,7 +1251,7 @@ function applyLang(){
   var phs=document.querySelectorAll('[data-i18n-ph]');
   for(var j=0;j<phs.length;j++){var k2=phs[j].getAttribute('data-i18n-ph');if(t[k2]!=null)phs[j].setAttribute('placeholder',t[k2]);}
   $('#langToggle').textContent=lang==='id'?'🌐 EN':'🌐 ID';
-  renderFiles();renderNotes();
+  renderFiles();renderNotes();edSync();
 }
 
 /* ================= EVENT ================= */
@@ -871,6 +1293,7 @@ $('#langToggle').addEventListener('click',function(){
 loadNotes();
 applyLang();
 updateStats();
+initEditor();
 openDB().then(function(d){db=d;return refreshFiles();})
   .catch(function(e){dbFailed=true;console.error(e);renderFiles();toast(I18N[lang].toastDbError,'err');});
 
