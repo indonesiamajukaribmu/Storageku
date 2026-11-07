@@ -160,7 +160,71 @@ footer{margin:30px 0 44px}
 .toast.out{opacity:0;transform:translateX(14px);transition:.32s}
 @keyframes slide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 
+/* ---------- Modal pratinjau (HUD futuristik) ---------- */
+.pv-backdrop{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+  padding:26px;background:rgba(4,6,11,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:pvFade .25s ease}
+.pv-backdrop[hidden]{display:none}
+.pv-modal{position:relative;width:min(980px,94vw);height:min(88vh,860px);display:flex;flex-direction:column;
+  background:linear-gradient(160deg,#141826,#10131d 55%,#161228);border:1px solid var(--line2);border-radius:18px;
+  box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 60px rgba(66,133,244,.15),0 0 90px rgba(255,27,45,.09);
+  overflow:hidden;animation:pvPop .32s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes pvFade{from{opacity:0}to{opacity:1}}
+@keyframes pvPop{from{opacity:0;transform:translateY(26px) scale(.94)}to{opacity:1;transform:none}}
+.pv-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:3;
+  background:var(--grad);background-size:200% 100%;animation:pvSlide 3s linear infinite}
+@keyframes pvSlide{from{background-position:0 0}to{background-position:200% 0}}
+.pv-corner{position:absolute;width:26px;height:26px;z-index:4;pointer-events:none;opacity:.95}
+.pv-corner.tl{top:10px;left:10px;border-top:2px solid #7aa7ff;border-left:2px solid #7aa7ff;border-top-left-radius:9px}
+.pv-corner.tr{top:10px;right:10px;border-top:2px solid #ff8a93;border-right:2px solid #ff8a93;border-top-right-radius:9px}
+.pv-corner.bl{bottom:10px;left:10px;border-bottom:2px solid #ff8a93;border-left:2px solid #ff8a93;border-bottom-left-radius:9px}
+.pv-corner.br{bottom:10px;right:10px;border-bottom:2px solid #7aa7ff;border-right:2px solid #7aa7ff;border-bottom-right-radius:9px}
+.pv-head{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:16px 20px 14px;
+  border-bottom:1px solid var(--line);position:relative;z-index:2;background:rgba(10,12,19,.5)}
+.pv-filemeta{min-width:0}
+.pv-name{font-weight:700;font-size:14.5px;word-break:break-word;line-height:1.3}
+.pv-sub{font-size:11.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.pv-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pv-body{position:relative;flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px}
+.pv-body::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(rgba(66,133,244,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(66,133,244,.05) 1px,transparent 1px);
+  background-size:34px 34px;animation:pvGrid 14s linear infinite}
+@keyframes pvGrid{from{background-position:0 0}to{background-position:34px 34px}}
+.pv-media{max-width:100%;max-height:100%;border-radius:12px;position:relative;z-index:1;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);background:#0a0c12}
+img.pv-media{object-fit:contain;cursor:zoom-in;transition:transform .25s ease}
+img.pv-media:hover{transform:scale(1.015)}
+.pv-zoom img.pv-media{max-width:none;max-height:none;cursor:zoom-out}
+iframe.pv-media{width:100%;height:100%;border:0;background:#fff}
+video.pv-media{width:min(720px,100%)}
+audio.pv-media{width:min(520px,92%);padding:18px;border:1px solid var(--line2);background:var(--card2)}
+.pv-code{position:relative;z-index:1;align-self:stretch;width:100%;max-height:100%;overflow:auto;
+  background:rgba(10,12,19,.9);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+  font-family:ui-monospace,'Cascadia Mono',Consolas,'Courier New',monospace;font-size:12.8px;line-height:1.6;
+  color:#c9d4f2;white-space:pre;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.pv-tablewrap{position:relative;z-index:1;align-self:stretch;width:100%;overflow:auto;max-height:100%;
+  border:1px solid var(--line);border-radius:12px;background:rgba(10,12,19,.9);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
+.pv-table th{position:sticky;top:0;background:linear-gradient(135deg,rgba(66,133,244,.3),rgba(255,27,45,.2));
+  color:#eaf0ff;font-weight:700;text-align:left;padding:9px 13px;border-bottom:1px solid var(--line2);white-space:nowrap}
+.pv-table td{padding:8px 13px;border-bottom:1px solid var(--line);color:#c9d4f2;white-space:nowrap}
+.pv-table tr:nth-child(even) td{background:rgba(255,255,255,.025)}
+.pv-trunc{position:relative;z-index:1;margin-top:10px;text-align:center;font-size:11.5px;color:var(--muted)}
+.pv-none{position:relative;z-index:1;text-align:center;max-width:470px;padding:34px 26px;
+  border:1px dashed var(--line2);border-radius:16px;background:rgba(14,17,25,.72)}
+.pv-none .big{font-size:44px;line-height:1;margin-bottom:12px}
+.pv-none h4{font-size:15.5px;margin-bottom:7px}
+.pv-none p{font-size:13px;color:var(--muted)}
+.pv-note{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:2;
+  font-size:10px;letter-spacing:1.8px;color:#5f6a8a;pointer-events:none;white-space:nowrap}
+.pv-spin{width:46px;height:46px;border-radius:50%;border:3px solid rgba(66,133,244,.2);
+  border-top-color:var(--blue);animation:pvSpin .8s linear infinite;position:relative;z-index:1}
+@keyframes pvSpin{to{transform:rotate(360deg)}}
+
 @media(max-width:620px){
+  .pv-backdrop{padding:10px}
+  .pv-modal{height:92vh}
+  .pv-actions{width:100%;margin-left:0}
   .header-side{margin-left:0}
   input[type=search]{max-width:none}
   .tools input[type=search]{flex:1;width:auto;max-width:none}
@@ -286,8 +350,39 @@ footer{margin:30px 0 44px}
         <span class="badge"><span class="dot" style="background:#ff1b2d"></span>Opera <span class="ok">✓</span></span>
       </div>
       <p class="muted small" data-i18n="footerText">Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ &amp; Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ &amp; Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser &amp; profil yang dipakai, dan tidak pernah dikirim ke server mana pun.</p>
+      <p class="muted small" style="margin-top:9px;opacity:.75">v1.1 · pratinjau file dalam modal futuristik / futuristic in-browser file preview</p>
     </div>
   </footer>
+</div>
+
+<!-- ================= MODAL PRATINJAU ================= -->
+<div id="pvBackdrop" class="pv-backdrop" hidden>
+  <div class="pv-modal" role="dialog" aria-modal="true" aria-label="Pratinjau file">
+    <span class="pv-corner tl"></span><span class="pv-corner tr"></span>
+    <span class="pv-corner bl"></span><span class="pv-corner br"></span>
+    <div class="pv-head">
+      <div class="pv-filemeta">
+        <div class="pv-name" id="pvName">—</div>
+        <div class="pv-sub" id="pvSub"></div>
+      </div>
+      <div class="pv-actions">
+        <button id="pvNewTab" class="btn ghost small">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span data-i18n="pvNewTab">Tab Baru</span>
+        </button>
+        <button id="pvDownload" class="btn primary small">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span data-i18n="btnDownload">Unduh</span>
+        </button>
+        <button id="pvClose" class="btn danger small">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span data-i18n="pvClose">Tutup</span>
+        </button>
+      </div>
+    </div>
+    <div class="pv-body" id="pvBody"></div>
+    <div class="pv-note">STORAGEKU · PRATINJAU LOKAL · TANPA SERVER</div>
+  </div>
 </div>
 
 <div id="toastWrap" aria-live="polite"></div>
@@ -314,7 +409,13 @@ id:{
   searchPhNotes:'Cari catatan…',
   emptyNotes:'Belum ada catatan — tulis catatan pertama Anda di atas.',
   emptyNotesSearch:'Tidak ada catatan yang cocok dengan pencarian.',
-  btnDownload:'Unduh', btnView:'Lihat', btnDelete:'Hapus',
+  btnDownload:'Unduh', btnView:'Pratinjau', btnDelete:'Hapus',
+  pvClose:'Tutup', pvNewTab:'Tab Baru', pvCol:'Kolom',
+  pvUnsupportedTitle:'Pratinjau Tidak Tersedia',
+  pvUnsupportedDesc:function(x){return 'Format .'+x+' tidak bisa ditampilkan langsung oleh browser. Unduh file untuk membukanya dengan aplikasi yang sesuai.';},
+  pvLoadError:'Gagal membaca isi file untuk pratinjau.',
+  pvCsvTrunc:function(n){return 'Menampilkan 300 baris pertama — '+n+' baris lainnya tidak ditampilkan.';},
+  pvTxtTrunc:'Menampilkan 200.000 karakter pertama.',
   footerTitle:'Kompatibilitas Browser',
   footerText:'Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ & Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ & Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser & profil yang dipakai, dan tidak pernah dikirim ke server mana pun.',
   confirmDelFile:function(n){return 'Hapus file "'+n+'"?';},
@@ -345,7 +446,13 @@ en:{
   searchPhNotes:'Search notes…',
   emptyNotes:'No notes yet — write your first note above.',
   emptyNotesSearch:'No notes match your search.',
-  btnDownload:'Download', btnView:'View', btnDelete:'Delete',
+  btnDownload:'Download', btnView:'Preview', btnDelete:'Delete',
+  pvClose:'Close', pvNewTab:'New Tab', pvCol:'Column',
+  pvUnsupportedTitle:'Preview Not Available',
+  pvUnsupportedDesc:function(x){return 'The .'+x+' format cannot be displayed natively by the browser. Download the file to open it with the appropriate application.';},
+  pvLoadError:'Failed to read the file contents for preview.',
+  pvCsvTrunc:function(n){return 'Showing the first 300 rows — '+n+' more rows are hidden.';},
+  pvTxtTrunc:'Showing the first 200,000 characters.',
   footerTitle:'Browser Compatibility',
   footerText:'Built with standard web APIs and optimized for Google Chrome and Opera (both Chromium-based). localStorage has been available since Chrome 4+ & Opera 10.5+, and IndexedDB since Chrome 24+ & Opera 15+. All data stays local on your device, bound to the browser profile you use — it is never sent to any server.',
   confirmDelFile:function(n){return 'Delete file "'+n+'"?';},
@@ -367,6 +474,7 @@ var DB_NAME='storagekuDB', STORE='files';
 var NOTES_KEY='storageku_notes_v1', LANG_KEY='storageku_lang';
 var MAX_FILE=250*1024*1024;
 var db=null, files=[], notes=[];
+var dbFailed=false;
 var lang='id';
 try{ lang=localStorage.getItem(LANG_KEY)==='en'?'en':'id'; }catch(e){}
 
@@ -469,10 +577,139 @@ function downloadFile(rec){
   a.href=url;a.download=rec.name;document.body.appendChild(a);a.click();a.remove();
   setTimeout(function(){URL.revokeObjectURL(url);},4000);
 }
-function viewFile(rec){
-  var url=URL.createObjectURL(rec.blob);window.open(url,'_blank');
-  setTimeout(function(){URL.revokeObjectURL(url);},60000);
+/* ================= PRATINJAU FILE (modal futuristik) ================= */
+var pvState={rec:null,url:null};
+var TEXT_EXT={txt:1,md:1,json:1,csv:1,tsv:1,xml:1,sql:1,log:1,html:1,htm:1,css:1,js:1,mjs:1,yml:1,yaml:1,ini:1,conf:1};
+function canPreview(rec){
+  var type=rec.type||'',e=extOf(rec.name);
+  if(rec.thumb)return true;
+  if(type.indexOf('image/')===0)return true;
+  if(type==='application/pdf'||type.indexOf('text/')===0)return true;
+  if(type.indexOf('audio/')===0||type.indexOf('video/')===0)return true;
+  if(type==='application/json'||type==='application/xml'||type==='application/javascript')return true;
+  return !!TEXT_EXT[e];
 }
+function openPreview(rec){
+  var t=I18N[lang];
+  pvState.rec=rec;
+  $('#pvName').textContent=rec.name;
+  var sub=$('#pvSub');sub.innerHTML='';
+  var chip=document.createElement('span');chip.className='mini-chip idb';chip.textContent='IndexedDB';
+  var st=document.createElement('span');st.textContent=fmtSize(rec.size)+' · '+fmtDate(rec.date);
+  sub.appendChild(chip);sub.appendChild(st);
+  $('#pvDownload').onclick=function(){downloadFile(rec);};
+  $('#pvNewTab').onclick=function(){
+    var u=URL.createObjectURL(rec.blob);window.open(u,'_blank');
+    setTimeout(function(){URL.revokeObjectURL(u);},60000);
+  };
+  $('#pvClose').onclick=closePreview;
+  $('#pvBackdrop').hidden=false;
+  document.body.style.overflow='hidden';
+  renderPreviewBody(rec);
+}
+function closePreview(){
+  var bd=$('#pvBackdrop');
+  if(bd.hidden)return;
+  bd.hidden=true;$('#pvBody').innerHTML='';
+  if(pvState.url){URL.revokeObjectURL(pvState.url);pvState.url=null;}
+  pvState.rec=null;
+  document.body.style.overflow='';
+}
+function pvUrl(rec){
+  if(pvState.url)URL.revokeObjectURL(pvState.url);
+  pvState.url=URL.createObjectURL(rec.blob);
+  return pvState.url;
+}
+function readFileText(blob,ok,fail){
+  var fr=new FileReader();
+  fr.onload=function(){ok(String(fr.result));};
+  fr.onerror=function(){fail();};
+  fr.readAsText(blob);
+}
+function buildCsvTable(txt,delim){
+  var t=I18N[lang];
+  var lines=txt.replace(/\r/g,'').split('\n').filter(function(l){return l.length;});
+  var MAXR=300;
+  var rows=lines.slice(0,MAXR).map(function(l){return l.split(delim);});
+  var cols=rows.length?rows[0].length:0;
+  var wrap=document.createElement('div');wrap.className='pv-tablewrap';
+  var tb=document.createElement('table');tb.className='pv-table';
+  var thead=document.createElement('thead'),trh=document.createElement('tr');
+  for(var c=0;c<cols;c++){var th=document.createElement('th');th.textContent=rows[0][c]||(t.pvCol+' '+(c+1));trh.appendChild(th);}
+  thead.appendChild(trh);tb.appendChild(thead);
+  var tbw=document.createElement('tbody');
+  rows.slice(1).forEach(function(r){
+    var tr=document.createElement('tr');
+    for(var i=0;i<cols;i++){var td=document.createElement('td');td.textContent=r[i]!==undefined?r[i]:'';tr.appendChild(td);}
+    tbw.appendChild(tr);
+  });
+  tb.appendChild(tbw);wrap.appendChild(tb);
+  if(lines.length>MAXR){
+    var p=document.createElement('p');p.className='pv-trunc';p.textContent=t.pvCsvTrunc(lines.length-MAXR);
+    wrap.appendChild(p);
+  }
+  return wrap;
+}
+function showUnsupported(rec,msg){
+  var t=I18N[lang],body=$('#pvBody');
+  var box=document.createElement('div');box.className='pv-none';
+  var big=document.createElement('div');big.className='big';big.textContent='\uD83D\uDEE1\uFE0F';
+  var h=document.createElement('h4');h.textContent=msg||t.pvUnsupportedTitle;
+  var p=document.createElement('p');
+  p.textContent=msg?t.pvUnsupportedTitle:t.pvUnsupportedDesc(extOf(rec.name).toUpperCase()||'FILE');
+  var b=document.createElement('button');b.type='button';b.className='btn primary small';b.style.marginTop='14px';
+  b.innerHTML=ICONS.download;
+  var sp=document.createElement('span');sp.textContent=t.btnDownload;b.appendChild(sp);
+  b.addEventListener('click',function(){downloadFile(rec);});
+  box.appendChild(big);box.appendChild(h);box.appendChild(p);box.appendChild(b);
+  body.appendChild(box);
+}
+function renderPreviewBody(rec){
+  var body=$('#pvBody'),t=I18N[lang];
+  body.className='pv-body';body.innerHTML='';
+  var type=rec.type||'',e=extOf(rec.name);
+  var url=pvUrl(rec);
+  /* gambar (termasuk SVG) */
+  if(rec.thumb||(type&&type.indexOf('image/')===0)){
+    var im=document.createElement('img');im.className='pv-media';im.src=rec.thumb||url;im.alt=rec.name;
+    im.title=t.btnView;im.addEventListener('click',function(){body.classList.toggle('pv-zoom');});
+    im.onerror=function(){body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvLoadError);};
+    body.appendChild(im);return;
+  }
+  /* PDF — ditampilkan oleh penampil PDF bawaan Chrome/Opera */
+  if(type==='application/pdf'||e==='pdf'){
+    var fr=document.createElement('iframe');fr.className='pv-media';fr.src=url;fr.title=rec.name;
+    body.appendChild(fr);return;
+  }
+  /* audio */
+  if(type.indexOf('audio/')===0||['mp3','wav','ogg','oga','m4a','flac'].indexOf(e)!==-1){
+    var au=document.createElement('audio');au.className='pv-media';au.controls=true;au.src=url;
+    body.appendChild(au);return;
+  }
+  /* video */
+  if(type.indexOf('video/')===0||['mp4','webm','mov','mkv','m4v'].indexOf(e)!==-1){
+    var vi=document.createElement('video');vi.className='pv-media';vi.controls=true;vi.src=url;
+    body.appendChild(vi);return;
+  }
+  /* teks / kode / csv / json */
+  if(canPreview(rec)){
+    var s=document.createElement('div');s.className='pv-spin';body.appendChild(s);
+    readFileText(rec.blob,function(txt){
+      body.innerHTML='';body.className='pv-body';
+      if(e==='csv'||e==='tsv'){body.appendChild(buildCsvTable(txt,e==='tsv'?'\t':','));return;}
+      if(e==='json'){try{txt=JSON.stringify(JSON.parse(txt),null,2);}catch(err){}}
+      var pre=document.createElement('pre');pre.className='pv-code';
+      if(txt.length>200000){pre.textContent=txt.slice(0,200000);
+        var p=document.createElement('p');p.className='pv-trunc';p.textContent=t.pvTxtTrunc;
+        body.appendChild(pre);body.appendChild(p);
+      }else{pre.textContent=txt;body.appendChild(pre);}
+    },function(){body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvLoadError);});
+    return;
+  }
+  showUnsupported(rec,null);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closePreview();});
+$('#pvBackdrop').addEventListener('click',function(e){if(e.target===this)closePreview();});
 
 /* ================= RENDER DOKUMEN ================= */
 function renderFiles(){
@@ -485,14 +722,14 @@ function renderFiles(){
   var empty=$('#fileEmpty'),emptyTxt=$('#fileEmptyText');
   if(!list.length){
     empty.hidden=false;
-    emptyTxt.textContent=!db?t.toastDbError:(q?t.emptyFilesSearch:t.emptyFiles);
+    emptyTxt.textContent=dbFailed?t.toastDbError:(q?t.emptyFilesSearch:t.emptyFiles);
   }else{empty.hidden=true;}
   list.forEach(function(rec){
     var card=document.createElement('article');card.className='fcard';
     var th=document.createElement('div');th.className='thumb';
     if(rec.thumb){
       var im=document.createElement('img');im.src=rec.thumb;im.alt=rec.name;im.loading='lazy';
-      im.title=t.btnView;im.addEventListener('click',function(){viewFile(rec);});
+      im.title=t.btnView;im.addEventListener('click',function(){openPreview(rec);});
       th.appendChild(im);
     }else{
       var bd=document.createElement('div');bd.className='badge-ext';
@@ -515,7 +752,7 @@ function renderFiles(){
       b.addEventListener('click',fn);return b;
     }
     act.appendChild(mkBtn('ghost',ICONS.download,t.btnDownload,function(){downloadFile(rec);}));
-    if(rec.thumb)act.appendChild(mkBtn('ghost',ICONS.eye,t.btnView,function(){viewFile(rec);}));
+    if(canPreview(rec))act.appendChild(mkBtn('ghost',ICONS.eye,t.btnView,function(){openPreview(rec);}));
     act.appendChild(mkBtn('danger',ICONS.trash,t.btnDelete,function(){
       if(confirm(t.confirmDelFile(rec.name))){
         idbDelete(rec.id).then(refreshFiles).then(function(){toast(t.toastDeleted,'ok');});
@@ -635,7 +872,7 @@ loadNotes();
 applyLang();
 updateStats();
 openDB().then(function(d){db=d;return refreshFiles();})
-  .catch(function(e){console.error(e);renderFiles();toast(I18N[lang].toastDbError,'err');});
+  .catch(function(e){dbFailed=true;console.error(e);renderFiles();toast(I18N[lang].toastDbError,'err');});
 
 /* Akses kecil untuk pengujian otomatis (tidak memengaruhi tampilan) */
 window.__storageKu={handleFiles:handleFiles,refreshFiles:refreshFiles};
