@@ -186,6 +186,9 @@ footer{margin:30px 0 44px}
 .pv-sub{font-size:11.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
 .pv-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .pv-body{position:relative;flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;padding:18px}
+.pv-body.pv-flow{flex-direction:column;align-items:center;justify-content:flex-start}
+.pv-body.pv-flow iframe.pv-media{height:auto;flex:1;min-height:0}
+.pv-body.pv-flow pre.pv-code{flex:1;max-height:none}
 .pv-body::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(rgba(66,133,244,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(66,133,244,.05) 1px,transparent 1px);
   background-size:34px 34px;animation:pvGrid 14s linear infinite}
@@ -220,6 +223,58 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
 .pv-spin{width:46px;height:46px;border-radius:50%;border:3px solid rgba(66,133,244,.2);
   border-top-color:var(--blue);animation:pvSpin .8s linear infinite;position:relative;z-index:1}
 @keyframes pvSpin{to{transform:rotate(360deg)}}
+.pv-pdfpage{display:block;margin:0 auto 10px;border-radius:6px;box-shadow:0 6px 22px rgba(0,0,0,.45);background:#fff;max-width:100%}
+.pv-sheettabs,.pv-htmlbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;position:relative;z-index:1}
+.pv-tab{font:inherit;font-size:12px;font-weight:600;color:#c6d0ea;background:rgba(15,20,38,.7);
+  border:1px solid rgba(148,163,199,.3);border-radius:999px;padding:5px 12px;cursor:pointer;transition:all .15s ease}
+.pv-tab.on{color:#fff;border-color:rgba(66,133,244,.65);background:rgba(66,133,244,.3)}
+.pv-doc{position:relative;z-index:1;align-self:stretch;width:100%;background:#fff;color:#1c2333;
+  border-radius:10px;padding:26px 30px;line-height:1.6;font-size:14px;overflow:auto}
+.pv-doc h1,.pv-doc h2,.pv-doc h3{color:#1a2b6d;margin:18px 0 8px}
+.pv-doc p{margin:0 0 10px}
+.pv-doc table{border-collapse:collapse;width:100%;margin:10px 0}
+.pv-doc td,.pv-doc th{border:1px solid #d8dee9;padding:6px 9px;font-size:13px}
+.pv-doc img{max-width:100%;border-radius:8px}
+.pv-doc a{color:#4285f4}
+.pv-doc ul,.pv-doc ol{padding-left:22px;margin:0 0 10px}
+.pv-doc.pv-md h1,.pv-doc.pv-md h2{border-bottom:2px solid #eef1f8;padding-bottom:5px}
+.pv-doc.pv-md code{background:#f2f4f8;padding:2px 6px;border-radius:5px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+.pv-doc.pv-md pre{background:#f2f4f8;padding:12px;border-radius:8px;overflow:auto}
+.pv-slide{position:relative;z-index:1;width:100%;background:#fff;color:#1c2333;border-radius:12px;
+  padding:18px 20px 16px;margin-bottom:14px;box-shadow:0 8px 26px rgba(0,0,0,.4)}
+.pv-slidehead{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.pv-slidenum{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;
+  border-radius:8px;background:linear-gradient(135deg,#4285f4,#7b5cf0);color:#fff;font-size:12.5px;font-weight:700;flex:none}
+.pv-slide .tt{font-weight:700;font-size:15px;color:#1a2b6d}
+.pv-slide p{margin:0 0 7px;font-size:13.5px;line-height:1.5}
+
+/* ---------- Navigasi & putar otomatis media (pratinjau) ---------- */
+.pv-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 20px;
+  border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(66,133,244,.07),rgba(123,92,240,.04));position:relative;z-index:2}
+.pv-nav[hidden]{display:none}
+.pv-navgrp{display:flex;align-items:center;gap:9px}
+.pv-nbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line2);
+  background:var(--card2);color:#c6d0ea;cursor:pointer;font:inherit;font-size:13px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease,color .15s ease}
+.pv-nbtn span{line-height:1}
+.pv-nbtn:hover{color:#fff;border-color:rgba(66,133,244,.7);
+  box-shadow:0 0 14px rgba(66,133,244,.4),inset 0 0 8px rgba(66,133,244,.18);transform:translateY(-1px)}
+.pv-nbtn:active{transform:translateY(0)}
+.pv-nbtn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.pv-cat{font-size:15px;line-height:1}
+.pv-pos{font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:600;color:#aab7dd;
+  background:var(--inset);border:1px solid var(--line);border-radius:999px;padding:4px 12px;min-width:64px;text-align:center}
+.pv-toggles{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.pv-tg{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#9fb0d6;
+  background:rgba(15,20,38,.6);border:1px solid rgba(148,163,199,.24);border-radius:999px;
+  padding:6px 13px;cursor:pointer;user-select:none;transition:border-color .15s ease,color .15s ease}
+.pv-tg:hover{color:#fff;border-color:rgba(123,92,240,.6)}
+.pv-tg input{accent-color:#7b5cf0;width:14px;height:14px;cursor:pointer;flex:none}
+.pv-tg.on{color:#fff;border-color:rgba(123,92,240,.65);
+  background:linear-gradient(135deg,rgba(123,92,240,.3),rgba(66,133,244,.22));
+  box-shadow:0 0 0 1px rgba(123,92,240,.3)}
+.pv-tg input:disabled+span{opacity:.55}
 
 /* ---------- Folder per jenis file ---------- */
 .folder-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
@@ -317,6 +372,10 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
   .dropzone{padding:30px 14px}
   .folder-bar{gap:6px;margin-bottom:12px}
   .fbtn{padding:6px 10px;font-size:11.5px}
+  .pv-nav{padding:8px 12px;gap:8px}
+  .pv-nbtn{width:31px;height:31px}
+  .pv-toggles{margin-left:0;width:100%}
+  .pv-tg{padding:5px 10px;font-size:11.5px}
 }
 </style>
 </head>
@@ -435,6 +494,7 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
     <p class="hint" data-i18n="edHint">Tulis kode seperti di Acode — pratinjau langsung di samping, simpan ke Dokumen, atau unduh. Draf tersimpan otomatis di browser.</p>
     <div class="ed-toolbar">
       <input id="edName" class="ed-name" data-i18n-ph="edNamePh" placeholder="nama-file">
+      <span class="mini-chip ls" id="edSrcChip" hidden></span>
       <select id="edLang" aria-label="Bahasa pemrograman">
         <option value="html">HTML</option>
         <option value="css">CSS</option>
@@ -495,7 +555,7 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
         <span class="badge"><span class="dot" style="background:#ff1b2d"></span>Opera <span class="ok">✓</span></span>
       </div>
       <p class="muted small" data-i18n="footerText">Dibangun dengan API web standar dan dioptimalkan untuk Google Chrome serta Opera (sama-sama berbasis Chromium). localStorage tersedia sejak Chrome 4+ &amp; Opera 10.5+, sedangkan IndexedDB sejak Chrome 24+ &amp; Opera 15+. Semua data tersimpan lokal di perangkat Anda, terikat pada browser &amp; profil yang dipakai, dan tidak pernah dikirim ke server mana pun.</p>
-      <p class="muted small" style="margin-top:9px;opacity:.75">v1.3 · folder per jenis file + editor kode gaya Acode + pratinjau futuristik / per-type folders + Acode-style code editor + futuristic preview</p>
+      <p class="muted small" style="margin-top:9px;opacity:.75">v1.5 · auto-lanjut &amp; ulangi media + navigasi ▲▼ gambar/video/audio + pratinjau dokumen + folder per jenis / media auto-next &amp; repeat + ▲▼ navigation for image/video/audio + document preview + per-type folders</p>
     </div>
   </footer>
 </div>
@@ -511,6 +571,10 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
         <div class="pv-sub" id="pvSub"></div>
       </div>
       <div class="pv-actions">
+        <button id="pvEdit" class="btn ghost small" hidden>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+          <span data-i18n="btnEdit">Edit</span>
+        </button>
         <button id="pvNewTab" class="btn ghost small">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           <span data-i18n="pvNewTab">Tab Baru</span>
@@ -523,6 +587,18 @@ table.pv-table{border-collapse:collapse;width:100%;font-size:12.8px}
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           <span data-i18n="pvClose">Tutup</span>
         </button>
+      </div>
+    </div>
+    <div class="pv-nav" id="pvNav" hidden>
+      <div class="pv-navgrp">
+        <button id="pvPrev" class="pv-nbtn" type="button" title="Sebelumnya / Previous (↑)"><span>▲</span></button>
+        <span class="pv-cat" id="pvNavCat" aria-hidden="true">🖼️</span>
+        <span class="pv-pos" id="pvPos">1 / 1</span>
+        <button id="pvNext" class="pv-nbtn" type="button" title="Berikutnya / Next (↓)"><span>▼</span></button>
+      </div>
+      <div class="pv-toggles" id="pvToggles" hidden>
+        <label class="pv-tg" id="pvLoopWrap"><input type="checkbox" id="pvLoop"><span data-i18n="pvLoop">Ulangi terus</span></label>
+        <label class="pv-tg" id="pvAutoWrap"><input type="checkbox" id="pvAuto"><span data-i18n="pvAuto">Auto lanjut</span></label>
       </div>
     </div>
     <div class="pv-body" id="pvBody"></div>
@@ -562,6 +638,18 @@ id:{
   pvLoadError:'Gagal membaca isi file untuk pratinjau.',
   pvCsvTrunc:function(n){return 'Menampilkan 300 baris pertama — '+n+' baris lainnya tidak ditampilkan.';},
   pvTxtTrunc:'Menampilkan 200.000 karakter pertama.',
+  pvPdfLoad:'Memuat pratinjau PDF…', pvPdfOffline:'Penampil PDF bawaan browser: jika halaman tetap kosong (umum di Android), gunakan tombol Unduh atau Tab Baru.',
+  pvPdfTrunc:function(n){return 'Menampilkan '+n+' halaman pertama.';},
+  pvXlsxErr:'Gagal membaca spreadsheet — butuh internet untuk memuat pustaka pertama kali.',
+  pvDocxErr:'Gagal membaca dokumen DOCX — butuh internet untuk memuat pustaka pertama kali.',
+  pvDocxEmpty:'(Dokumen ini tidak berisi teks.)',
+  pvPptxErr:'Gagal membaca presentasi PPTX — butuh internet untuk memuat pustaka pertama kali.',
+  pvPptxNote:'Pratinjau teks per slide — tata letak asli slide tidak dirender.',
+  pvLoop:'Ulangi terus', pvAuto:'Auto lanjut',
+  pvTapPlay:'Putar otomatis diblokir browser — ketuk tombol ▶ untuk memutar.',
+  pvHtmlRender:'Tampilan', pvHtmlCode:'Kode',
+  edUpdateOk:function(n){return 'Perubahan disimpan ke file "'+n+'".';},
+  edSrcTip:'Menyunting file asli — tombol Simpan akan memperbarui file ini, bukan membuat salinan baru.',
   edTitle:'Editor Kode',
   edHint:'Tulis kode seperti di Acode — pratinjau langsung di samping, simpan ke Dokumen, atau unduh. Draf tersimpan otomatis di browser.',
   edAuto:'Otomatis', edNew:'Baru', edExample:'Contoh', edSaveDoc:'Simpan ke Dokumen',
@@ -615,6 +703,18 @@ en:{
   pvLoadError:'Failed to read the file contents for preview.',
   pvCsvTrunc:function(n){return 'Showing the first 300 rows — '+n+' more rows are hidden.';},
   pvTxtTrunc:'Showing the first 200,000 characters.',
+  pvPdfLoad:'Loading PDF preview…', pvPdfOffline:'Built-in browser PDF viewer: if the page stays blank (common on Android), use the Download or New Tab button.',
+  pvPdfTrunc:function(n){return 'Showing the first '+n+' pages.';},
+  pvXlsxErr:'Failed to read the spreadsheet — internet is needed the first time to load the library.',
+  pvDocxErr:'Failed to read the DOCX document — internet is needed the first time to load the library.',
+  pvDocxEmpty:'(This document contains no text.)',
+  pvPptxErr:'Failed to read the PPTX presentation — internet is needed the first time to load the library.',
+  pvPptxNote:'Per-slide text preview — the original slide layout is not rendered.',
+  pvLoop:'Repeat', pvAuto:'Auto next',
+  pvTapPlay:'Autoplay was blocked by the browser — tap the ▶ button to play.',
+  pvHtmlRender:'Render', pvHtmlCode:'Code',
+  edUpdateOk:function(n){return 'Changes saved to file "'+n+'".';},
+  edSrcTip:'Editing the original file — the Save button updates this file instead of creating a new copy.',
   edTitle:'Code Editor',
   edHint:'Write code Acode-style — live preview on the side, save to Documents, or download. Drafts auto-save in your browser.',
   edAuto:'Auto', edNew:'New', edExample:'Example', edSaveDoc:'Save to Documents',
@@ -762,6 +862,7 @@ function downloadFile(rec){
 }
 /* ================= PRATINJAU FILE (modal futuristik) ================= */
 var pvState={rec:null,url:null};
+var CDN='https://cdnjs.cloudflare.com/ajax/libs/';
 var TEXT_EXT={txt:1,md:1,json:1,csv:1,tsv:1,xml:1,sql:1,log:1,html:1,htm:1,css:1,js:1,mjs:1,yml:1,yaml:1,ini:1,conf:1,
   py:1,ts:1,java:1,c:1,cpp:1,cs:1,go:1,rs:1,rb:1,php:1,swift:1,kt:1,dart:1,lua:1,sh:1,bat:1,ps1:1,toml:1,env:1};
 function canPreview(rec){
@@ -771,6 +872,7 @@ function canPreview(rec){
   if(type==='application/pdf'||type.indexOf('text/')===0)return true;
   if(type.indexOf('audio/')===0||type.indexOf('video/')===0)return true;
   if(type==='application/json'||type==='application/xml'||type==='application/javascript')return true;
+  if(e==='docx'||e==='xlsx'||e==='xls'||e==='ods'||e==='pptx')return true;
   return !!TEXT_EXT[e];
 }
 function openPreview(rec){
@@ -782,6 +884,9 @@ function openPreview(rec){
   var st=document.createElement('span');st.textContent=fmtSize(rec.size)+' · '+fmtDate(rec.date);
   sub.appendChild(chip);sub.appendChild(st);
   $('#pvDownload').onclick=function(){downloadFile(rec);};
+  var eb=$('#pvEdit');
+  if(isTextFile(rec)){eb.hidden=false;eb.onclick=function(){closePreview();openInEditor(rec);};}
+  else{eb.hidden=true;}
   $('#pvNewTab').onclick=function(){
     var u=URL.createObjectURL(rec.blob);window.open(u,'_blank');
     setTimeout(function(){URL.revokeObjectURL(u);},60000);
@@ -790,6 +895,7 @@ function openPreview(rec){
   $('#pvBackdrop').hidden=false;
   document.body.style.overflow='hidden';
   renderPreviewBody(rec);
+  pvSyncNav();
 }
 function closePreview(){
   var bd=$('#pvBackdrop');
@@ -834,6 +940,182 @@ function buildCsvTable(txt,delim){
   }
   return wrap;
 }
+function xmlEnt(s){
+  return s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'")
+    .replace(/&#x([0-9a-fA-F]+);/g,function(_,h){return String.fromCharCode(parseInt(h,16));})
+    .replace(/&#(\d+);/g,function(_,d){return String.fromCharCode(parseInt(d,10));})
+    .replace(/&amp;/g,'&');
+}
+function xlsxColName(i){var s='';i++;while(i){var m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=(i-m-1)/26;}return s;}
+function pvRenderPdf(rec,url){
+  var body=$('#pvBody'),t=I18N[lang];
+  var spin=document.createElement('div');spin.className='pv-spin';body.appendChild(spin);
+  var msg=document.createElement('p');msg.className='pv-trunc';msg.textContent=t.pvPdfLoad;body.appendChild(msg);
+  var ready=(window.pdfjsLib?Promise.resolve():loadScriptOnce(CDN+'pdf.js/3.11.174/pdf.min.js'))
+    .then(function(){
+      if(window.__pdfWorkerUrl)return;
+      return fetch(CDN+'pdf.js/3.11.174/pdf.worker.min.js').then(function(r){return r.text();})
+        .then(function(src){
+          var b=new Blob([src],{type:'application/javascript'});
+          window.__pdfWorkerUrl=URL.createObjectURL(b);
+        }).catch(function(){});
+    })
+    .then(function(){
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc=window.__pdfWorkerUrl||CDN+'pdf.js/3.11.174/pdf.worker.min.js';
+      return rec.blob.arrayBuffer();
+    })
+    .then(function(buf){return window.pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;});
+  ready.then(function(pdf){
+    body.innerHTML='';body.className='pv-body pv-flow';
+    var w=Math.max((body.clientWidth||720)-20,240);
+    var max=Math.min(pdf.numPages,20),i=1;
+    (function next(){
+      if(i>max){
+        if(pdf.numPages>max){var p=document.createElement('p');p.className='pv-trunc';p.textContent=t.pvPdfTrunc(pdf.numPages-max);body.appendChild(p);}
+        return;
+      }
+      pdf.getPage(i).then(function(pg){
+        var dpr=Math.min(window.devicePixelRatio||1,2);
+        var v1=pg.getViewport({scale:1});
+        var sc=Math.min(w*dpr/v1.width,dpr*1.5);
+        var vp=pg.getViewport({scale:sc});
+        var cv=document.createElement('canvas');cv.className='pv-pdfpage';
+        cv.width=Math.floor(vp.width);cv.height=Math.floor(vp.height);
+        cv.style.width=Math.floor(vp.width/dpr)+'px';
+        body.appendChild(cv);
+        pg.render({canvasContext:cv.getContext('2d'),viewport:vp});
+        i++;next();
+      }).catch(function(){i++;next();});
+    })();
+  }).catch(function(e){
+    console.error(e);
+    body.innerHTML='';body.className='pv-body pv-flow';
+    var fr=document.createElement('iframe');fr.className='pv-media';fr.src=url;fr.title=rec.name;
+    body.appendChild(fr);
+    var note=document.createElement('p');note.className='pv-trunc';note.textContent=t.pvPdfOffline;
+    body.appendChild(note);
+  });
+}
+function pvRenderDocx(rec){
+  var body=$('#pvBody'),t=I18N[lang];
+  var spin=document.createElement('div');spin.className='pv-spin';body.appendChild(spin);
+  (window.mammoth?Promise.resolve():loadScriptOnce(CDN+'mammoth/1.6.0/mammoth.browser.min.js'))
+    .then(function(){return rec.blob.arrayBuffer();})
+    .then(function(buf){return window.mammoth.convertToHtml({arrayBuffer:buf});})
+    .then(function(res){
+      body.innerHTML='';body.className='pv-body pv-flow';
+      var art=document.createElement('div');art.className='pv-doc';
+      art.innerHTML=res.value||('<p><em>'+t.pvDocxEmpty+'</em></p>');
+      body.appendChild(art);
+    })
+    .catch(function(e){console.error(e);body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvDocxErr);});
+}
+function pvRenderSheet(rec){
+  var body=$('#pvBody'),t=I18N[lang];
+  var spin=document.createElement('div');spin.className='pv-spin';body.appendChild(spin);
+  function showSheet(ws,holder){
+    var rows=window.XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+    var MAXR=500;
+    holder.innerHTML='';
+    var slice=rows.slice(0,MAXR),cols=0,i;
+    for(i=0;i<slice.length;i++)if(slice[i].length>cols)cols=slice[i].length;
+    var wrap=document.createElement('div');wrap.className='pv-tablewrap';
+    var tb=document.createElement('table');tb.className='pv-table';
+    var thead=document.createElement('thead'),trh=document.createElement('tr');
+    for(var c=0;c<cols;c++){var th=document.createElement('th');th.textContent=xlsxColName(c);trh.appendChild(th);}
+    thead.appendChild(trh);tb.appendChild(thead);
+    var tbw=document.createElement('tbody');
+    slice.forEach(function(r){
+      var tr=document.createElement('tr');
+      for(var j=0;j<cols;j++){var td=document.createElement('td');td.textContent=(r[j]!==undefined&&r[j]!==null)?String(r[j]):'';tr.appendChild(td);}
+      tbw.appendChild(tr);
+    });
+    tb.appendChild(tbw);wrap.appendChild(tb);holder.appendChild(wrap);
+    if(rows.length>MAXR){var p=document.createElement('p');p.className='pv-trunc';p.textContent=t.pvCsvTrunc(rows.length-MAXR);holder.appendChild(p);}
+  }
+  (window.XLSX?Promise.resolve():loadScriptOnce(CDN+'xlsx/0.18.5/xlsx.full.min.js'))
+    .then(function(){return rec.blob.arrayBuffer();})
+    .then(function(buf){return window.XLSX.read(buf,{type:'array'});})
+    .then(function(wb){
+      body.innerHTML='';body.className='pv-body pv-flow';
+      var holder=document.createElement('div');holder.style.width='100%';
+      if(wb.SheetNames.length>1){
+        var tabs=document.createElement('div');tabs.className='pv-sheettabs';
+        wb.SheetNames.forEach(function(sn,ix){
+          var b=document.createElement('button');b.type='button';b.className='pv-tab'+(ix===0?' on':'');b.textContent=sn;
+          b.addEventListener('click',function(){
+            [].slice.call(tabs.children).forEach(function(x){x.classList.remove('on');});
+            b.classList.add('on');showSheet(wb.Sheets[sn],holder);
+          });
+          tabs.appendChild(b);
+        });
+        body.appendChild(tabs);
+      }
+      body.appendChild(holder);
+      showSheet(wb.Sheets[wb.SheetNames[0]],holder);
+    })
+    .catch(function(e){console.error(e);body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvXlsxErr);});
+}
+function pvRenderPptx(rec){
+  var body=$('#pvBody'),t=I18N[lang];
+  var spin=document.createElement('div');spin.className='pv-spin';body.appendChild(spin);
+  (window.JSZip?Promise.resolve():loadScriptOnce(CDN+'jszip/3.10.1/jszip.min.js'))
+    .then(function(){return rec.blob.arrayBuffer();})
+    .then(function(buf){return window.JSZip.loadAsync(buf);})
+    .then(function(zip){
+      var names=Object.keys(zip.files).filter(function(n){return /^ppt\/slides\/slide\d+\.xml$/.test(n);})
+        .sort(function(a,b){return parseInt(a.replace(/\D/g,''),10)-parseInt(b.replace(/\D/g,''),10);});
+      if(!names.length)return [];
+      return Promise.all(names.slice(0,60).map(function(n){return zip.files[n].async('string');}));
+    })
+    .then(function(xmls){
+      body.innerHTML='';body.className='pv-body pv-flow';
+      var note=document.createElement('p');note.className='pv-trunc';note.textContent=t.pvPptxNote;body.appendChild(note);
+      if(!xmls.length){showUnsupported(rec,t.pvPptxErr);return;}
+      xmls.forEach(function(xml,ix){
+        var runs=xml.match(/<a:t>[^<]*<\/a:t>/g)||[];
+        var card=document.createElement('div');card.className='pv-slide';
+        var head=document.createElement('div');head.className='pv-slidehead';
+        var num=document.createElement('span');num.className='pv-slidenum';num.textContent=String(ix+1);
+        var ttl=document.createElement('span');ttl.className='tt';
+        ttl.textContent=runs.length?xmlEnt(runs[0].replace(/<\/?a:t>/g,'')).slice(0,90):('Slide '+(ix+1));
+        head.appendChild(num);head.appendChild(ttl);card.appendChild(head);
+        var bd=document.createElement('div');
+        runs.slice(1,40).forEach(function(r){
+          var tx=xmlEnt(r.replace(/<\/?a:t>/g,''));
+          if(tx.trim()){var p=document.createElement('p');p.textContent='\u2022 '+tx;bd.appendChild(p);}
+        });
+        if(!bd.children.length){var em=document.createElement('p');em.style.opacity='.6';em.textContent='\u2014';bd.appendChild(em);}
+        card.appendChild(bd);body.appendChild(card);
+      });
+    })
+    .catch(function(e){console.error(e);body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvPptxErr);});
+}
+function pvRenderHtml(rec,url){
+  var body=$('#pvBody'),t=I18N[lang];
+  body.className='pv-body pv-flow';
+  var bar=document.createElement('div');bar.className='pv-htmlbar';
+  var bV=document.createElement('button');bV.type='button';bV.className='pv-tab on';bV.textContent=t.pvHtmlRender;
+  var bC=document.createElement('button');bC.type='button';bC.className='pv-tab';bC.textContent=t.pvHtmlCode;
+  bar.appendChild(bV);bar.appendChild(bC);body.appendChild(bar);
+  var fr=document.createElement('iframe');fr.className='pv-media';
+  fr.sandbox='allow-scripts allow-modals allow-forms';fr.title=rec.name;
+  var pre=document.createElement('pre');pre.className='pv-code';pre.hidden=true;
+  body.appendChild(fr);body.appendChild(pre);
+  readFileText(rec.blob,function(txt){fr.srcdoc=txt;pre.textContent=txt;},
+    function(){body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvLoadError);});
+  bV.addEventListener('click',function(){bV.classList.add('on');bC.classList.remove('on');fr.hidden=false;pre.hidden=true;});
+  bC.addEventListener('click',function(){bC.classList.add('on');bV.classList.remove('on');fr.hidden=true;pre.hidden=false;});
+}
+function pvRenderMd(rec){
+  var body=$('#pvBody'),t=I18N[lang];
+  readFileText(rec.blob,function(txt){
+    body.innerHTML='';body.className='pv-body pv-flow';
+    var art=document.createElement('div');art.className='pv-doc pv-md';
+    art.innerHTML=edMdToHtml(txt);
+    body.appendChild(art);
+  },function(){showUnsupported(rec,t.pvLoadError);});
+}
 function showUnsupported(rec,msg){
   var t=I18N[lang],body=$('#pvBody');
   var box=document.createElement('div');box.className='pv-none';
@@ -860,20 +1142,27 @@ function renderPreviewBody(rec){
     im.onerror=function(){body.innerHTML='';body.className='pv-body';showUnsupported(rec,t.pvLoadError);};
     body.appendChild(im);return;
   }
-  /* PDF — ditampilkan oleh penampil PDF bawaan Chrome/Opera */
-  if(type==='application/pdf'||e==='pdf'){
-    var fr=document.createElement('iframe');fr.className='pv-media';fr.src=url;fr.title=rec.name;
-    body.appendChild(fr);return;
-  }
+  /* PDF — dirender dengan PDF.js agar tampil di desktop & Android */
+  if(type==='application/pdf'||e==='pdf'){pvRenderPdf(rec,url);return;}
+  /* DOCX — isi dokumen ditampilkan sebagai artikel */
+  if(e==='docx'){pvRenderDocx(rec);return;}
+  /* XLSX/XLS/ODS — tabel interaktif per sheet */
+  if(e==='xlsx'||e==='xls'||e==='ods'){pvRenderSheet(rec);return;}
+  /* PPTX — teks per slide */
+  if(e==='pptx'){pvRenderPptx(rec);return;}
+  /* HTML — dirender dalam iframe, bisa lihat kode */
+  if(e==='html'||e==='htm'){pvRenderHtml(rec,url);return;}
+  /* Markdown — dirender seperti di editor */
+  if(e==='md'||e==='markdown'){pvRenderMd(rec);return;}
   /* audio */
   if(type.indexOf('audio/')===0||['mp3','wav','ogg','oga','m4a','flac'].indexOf(e)!==-1){
     var au=document.createElement('audio');au.className='pv-media';au.controls=true;au.src=url;
-    body.appendChild(au);return;
+    wireMedia(au);body.appendChild(au);return;
   }
   /* video */
   if(type.indexOf('video/')===0||['mp4','webm','mov','mkv','m4v'].indexOf(e)!==-1){
     var vi=document.createElement('video');vi.className='pv-media';vi.controls=true;vi.src=url;
-    body.appendChild(vi);return;
+    wireMedia(vi);body.appendChild(vi);return;
   }
   /* teks / kode / csv / json */
   if(canPreview(rec)){
@@ -892,8 +1181,93 @@ function renderPreviewBody(rec){
   }
   showUnsupported(rec,null);
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closePreview();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closePreview();return;}
+  if($('#pvBackdrop').hidden||!pvState.rec)return;
+  if(!PV_NAV[catOf(pvState.rec.name)])return;
+  var tg=e.target&&e.target.tagName;
+  if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
+  if(e.key==='ArrowUp'){e.preventDefault();pvGo(-1);}
+  else if(e.key==='ArrowDown'){e.preventDefault();pvGo(1);}
+});
 $('#pvBackdrop').addEventListener('click',function(e){if(e.target===this)closePreview();});
+
+/* ============ NAVIGASI ▲▼ & PUTAR OTOMATIS MEDIA ============ */
+var PV_NAV={image:1,video:1,audio:1};   /* kategori yang punya tombol ▲▼ */
+var PV_MEDIA={video:1,audio:1};         /* kategori yang punya Auto/Ulangi */
+var PV_KEY_AUTO='storageku_auto_next',PV_KEY_LOOP='storageku_loop';
+var pvAuto=true,pvLoop=false,pvPlayHintShown=false;
+try{pvAuto=localStorage.getItem(PV_KEY_AUTO)!=='0';pvLoop=localStorage.getItem(PV_KEY_LOOP)==='1';}catch(e){}
+function pvIndexOf(list,rec){for(var i=0;i<list.length;i++)if(list[i].id===rec.id)return i;return -1;}
+function pvListFor(rec){
+  var c=catOf(rec.name);
+  return files.filter(function(f){return catOf(f.name)===c;})
+              .sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+}
+function catIconOf(rec){var c=catOf(rec.name),i;for(i=0;i<CATS.length;i++)if(CATS[i].id===c)return CATS[i].icon;return '\uD83D\uDCC1';}
+function pvSyncNav(){
+  var nav=$('#pvNav'),tg=$('#pvToggles'),rec=pvState.rec;
+  if(!nav)return;
+  if(!rec||!PV_NAV[catOf(rec.name)]){nav.hidden=true;return;}
+  var list=pvListFor(rec),idx=pvIndexOf(list,rec);
+  if(idx===-1)idx=0;
+  nav.hidden=false;
+  $('#pvNavCat').textContent=catIconOf(rec);
+  $('#pvPos').textContent=(idx+1)+' / '+list.length;
+  var one=list.length<2;
+  $('#pvPrev').disabled=one;$('#pvNext').disabled=one;
+  var media=!!PV_MEDIA[catOf(rec.name)];
+  tg.hidden=!media;
+  if(media){
+    $('#pvLoop').checked=pvLoop;$('#pvAuto').checked=pvAuto;$('#pvAuto').disabled=pvLoop;
+    $('#pvLoopWrap').classList.toggle('on',pvLoop);$('#pvAutoWrap').classList.toggle('on',pvAuto&&!pvLoop);
+  }
+}
+function pvGo(dir){
+  var rec=pvState.rec;if(!rec)return;
+  var list=pvListFor(rec);if(list.length<2)return;
+  var idx=pvIndexOf(list,rec);if(idx===-1)idx=0;
+  var n=(idx+dir+list.length)%list.length;   /* berputar: ujung atas ↔ bawah */
+  var el=document.querySelector('#pvBody video,#pvBody audio');
+  if(el){try{el.pause();}catch(e){}}
+  openPreview(list[n]);
+}
+function wireMedia(el){
+  var t=I18N[lang];
+  el.loop=pvLoop;
+  el.addEventListener('ended',function(){
+    if(pvLoop){try{el.currentTime=0;el.play();}catch(e){}return;}
+    if(pvAuto)pvGo(1);
+  });
+  if(pvAuto&&!pvLoop){
+    var p=null;try{p=el.play();}catch(e){}
+    if(p&&p.catch)p.catch(function(){
+      if(!pvPlayHintShown){pvPlayHintShown=true;toast(t.pvTapPlay,'warn');}
+    });
+  }
+}
+function applyMediaMode(){
+  var el=document.querySelector('#pvBody video,#pvBody audio');
+  if(!el)return;
+  el.loop=pvLoop;
+  if(pvLoop||pvAuto){try{var p=el.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+}
+$('#pvLoop').addEventListener('change',function(){
+  pvLoop=this.checked;
+  try{localStorage.setItem(PV_KEY_LOOP,pvLoop?'1':'0');}catch(e){}
+  if(pvLoop){pvAuto=false;try{localStorage.setItem(PV_KEY_AUTO,'0');}catch(e){}}
+  $('#pvAuto').checked=pvAuto;$('#pvAuto').disabled=pvLoop;
+  $('#pvLoopWrap').classList.toggle('on',pvLoop);$('#pvAutoWrap').classList.toggle('on',pvAuto&&!pvLoop);
+  applyMediaMode();
+});
+$('#pvAuto').addEventListener('change',function(){
+  pvAuto=this.checked;
+  try{localStorage.setItem(PV_KEY_AUTO,pvAuto?'1':'0');}catch(e){}
+  $('#pvAutoWrap').classList.toggle('on',pvAuto&&!pvLoop);
+  applyMediaMode();
+});
+$('#pvPrev').addEventListener('click',function(){pvGo(-1);});
+$('#pvNext').addEventListener('click',function(){pvGo(1);});
 
 /* ================= FOLDER PER JENIS FILE ================= */
 var CATS=[
@@ -1071,7 +1445,7 @@ var ED_EXAMPLES={
   plain:'Tulis teks apa saja di sini.\nBaris kedua untuk contoh.'
 };
 var ED_JS_HOOK='<scr'+'ipt>(function(){function send(l,a){try{parent.postMessage({__ed:1,level:l,text:a},"*")}catch(e){}}["log","info","warn","error"].forEach(function(k){var o=console[k]?console[k].bind(console):function(){};console[k]=function(){send(k,[].slice.call(arguments).map(function(x){try{return typeof x==="object"?JSON.stringify(x):String(x)}catch(e){return String(x)}}));o&&o.apply(null,arguments);};});window.onerror=function(m,s,n){send("error",[m+(n?" (baris "+n+")":"")]);};})();<\/scr'+'ipt>';
-var edDebHl=null,edDebDraft=null,edDebPrev=null,edPyodide=null,edPyLoading=false,edPyPromise=null;
+var edDebHl=null,edDebDraft=null,edDebPrev=null,edPyodide=null,edPyLoading=false,edPyPromise=null,edSource=null;
 function edEsc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function edGetLang(){return $('#edLang').value;}
 function edLineNums(code){var n=code.split('\n').length,s='',i;for(i=1;i<=n;i++)s+=i+'\n';return s;}
@@ -1110,6 +1484,12 @@ function edSaveDraft(){
   }catch(e){}
 }
 function edPreviewOpen(){return !$('#edPreviewPanel').hidden;}
+function edSyncSrc(){
+  var chip=document.getElementById('edSrcChip');
+  if(!chip)return;
+  if(edSource){chip.hidden=false;chip.textContent='\u270e '+edSource.name;chip.title=I18N[lang].edSrcTip;}
+  else{chip.hidden=true;}
+}
 function edConsoleClear(){$('#edConsole').textContent='';}
 function edConsoleAppend(level,parts){
   var con=$('#edConsole'),line=document.createElement('div');
@@ -1124,7 +1504,7 @@ function edMdToHtml(src){
     var L=lines[i];
     if(/^```/.test(L)){closeList();inCode=!inCode;out.push(inCode?'<pre>':'</pre>');continue;}
     if(inCode){out.push(L);continue;}
-    var h=L.match(/^#{1,6}\s+(.*)$/);
+    var h=L.match(/^(#{1,6})\s+(.*)$/);
     if(h){var lv=h[1].length;closeList();out.push('<h'+lv+'>'+h[2]+'</h'+lv+'>');continue;}
     var ul=L.match(/^\s*[-*+]\s+(.*)$/),ol=L.match(/^\s*\d+\.\s+(.*)$/);
     if(ul){if(listType!=='ul'){closeList();out.push('<ul>');listType='ul';}out.push('<li>'+ul[1]+'</li>');continue;}
@@ -1219,11 +1599,21 @@ function edFileName(){
 function edSaveDoc(){
   var t=I18N[lang],code=$('#edText').value;
   if(!code.trim()){toast(t.edEmptyCode,'warn');return;}
-  var name=edFileName();
-  var f=new File([code],name,{type:ED_MIME[edGetLang()]||'text/plain'});
+  var wasUpd=!!edSource;
+  var name=wasUpd?($('#edName').value.trim()||edSource.name):edFileName();
+  var f=new File([code],name,{type:wasUpd?(edSource.type||''):(ED_MIME[edGetLang()]||'text/plain')});
+  function done(rec){
+    edSource=rec;edSyncSrc();
+    return refreshFiles().then(function(){toast(wasUpd?t.edUpdateOk(name):t.edSavedDoc(name),'ok');});
+  }
+  if(wasUpd){
+    var rec={id:edSource.id,name:name,size:f.size,type:f.type||edSource.type||'',date:new Date().toISOString(),blob:f,thumb:edSource.thumb};
+    return idbPut(rec).then(function(){return done(rec);})
+      .catch(function(e){console.error(e);toast(t.toastDbError,'err');});
+  }
   makeThumb(f).then(function(th){
-    var rec={id:uid(),name:f.name,size:f.size,type:f.type||'',date:new Date().toISOString(),blob:f,thumb:th};
-    return idbPut(rec).then(function(){return refreshFiles();}).then(function(){toast(t.edSavedDoc(name),'ok');});
+    var rec2={id:uid(),name:f.name,size:f.size,type:f.type||'',date:new Date().toISOString(),blob:f,thumb:th};
+    return idbPut(rec2).then(function(){return done(rec2);});
   }).catch(function(e){console.error(e);toast(t.toastDbError,'err');});
 }
 function edDownloadCode(){
@@ -1236,6 +1626,8 @@ function isTextFile(rec){
   if(rec.thumb)return false;
   var type=rec.type||'';
   if(type.indexOf('image/')===0||type.indexOf('audio/')===0||type.indexOf('video/')===0||type==='application/pdf')return false;
+  var e=extOf(rec.name);
+  if(e==='docx'||e==='xlsx'||e==='xls'||e==='ods'||e==='pptx')return false;
   return canPreview(rec);
 }
 function openInEditor(rec){
@@ -1244,7 +1636,7 @@ function openInEditor(rec){
     $('#edText').value=txt;
     $('#edName').value=rec.name;
     $('#edLang').value=ED_EXT_LANG[extOf(rec.name)]||'plain';
-    edSync();edSaveDraft();
+    edSource=rec;edSyncSrc();edSync();edSaveDraft();
     document.getElementById('editorCard').scrollIntoView({behavior:'smooth'});
     if(['html','css','md','json','plain'].indexOf(edGetLang())!==-1)edRenderPreview();
     toast(t.edOpened,'ok');
@@ -1281,14 +1673,14 @@ function initEditor(){
   $('#edNew').addEventListener('click',function(){
     var t=I18N[lang];
     if($('#edText').value.trim()&&!confirm(t.edConfirmNew))return;
-    ta.value='';$('#edName').value='';edHighlightNow();edSaveDraft();
+    ta.value='';$('#edName').value='';edHighlightNow();edSaveDraft();edSource=null;edSyncSrc();
   });
   $('#edExample').addEventListener('click',function(){
     var t=I18N[lang],l=edGetLang();
     if(ta.value.trim()&&ta.value!==ED_EXAMPLES[l]&&!confirm(t.edConfirmNew))return;
     ta.value=ED_EXAMPLES[l]||'';
     if(!$('#edName').value.trim())$('#edName').value='contoh.'+ED_EXT_FROM_LANG[l];
-    edHighlightNow();edSaveDraft();
+    edHighlightNow();edSaveDraft();edSource=null;edSyncSrc();
     if(['html','css','md','json'].indexOf(l)!==-1)edRenderPreview();
   });
   window.addEventListener('message',function(e){
